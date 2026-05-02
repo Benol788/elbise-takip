@@ -636,6 +636,29 @@
       }
     }
 
+    .product.target-hit {
+      border-color: rgba(8, 127, 91, 0.45);
+      background:
+        linear-gradient(135deg, rgba(236, 253, 245, 0.98), rgba(240, 253, 244, 0.94));
+      box-shadow: 0 12px 30px rgba(8, 127, 91, 0.16);
+    }
+
+    .product.target-hit::before {
+      background: linear-gradient(180deg, #22c55e, #86efac);
+    }
+
+    .product.target-hit .title::after {
+      content: "  Uygun";
+      display: inline-flex;
+      margin-left: 8px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      color: #047857;
+      background: rgba(34, 197, 94, 0.14);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
     </style>
   </head>
   <body>
@@ -784,14 +807,27 @@
         })}`;
       }
       
+      function isTargetHit(row) {
+       const price = Number(row.last_price);
+       const minPrice = Number(row.target_price_min);
+       const maxPrice = Number(row.target_price_max);
+       const priceOk = Number.isFinite(price) && price >= minPrice && price <= maxPrice;
+       const stockOk = row.last_stock_status === "var";
+       return priceOk && stockOk;
+    }
+      
       function renderProducts(rows) {
         if (!rows.length) {
           listEl.innerHTML = '<div class="empty">Henüz ürün yok.</div>';
           return;
         }
 
-        listEl.innerHTML = rows
-          .map((row) => {
+      const sortedRows = [...rows].sort((a, b) => {
+        return Number(isTargetHit(b)) - Number(isTargetHit(a));
+      });
+
+      listEl.innerHTML = sortedRows
+         .map((row) => {
             const price = `${Number(row.target_price_min)}-${Number(row.target_price_max)} TL`;
             const sizes = Array.isArray(row.target_sizes) && row.target_sizes.length
               ? `Beden: ${row.target_sizes.join(", ")}`
@@ -813,7 +849,7 @@
               ? `<a class="product-link" href="${row.product_url}" target="_blank" rel="noopener">Ürünü aç</a>`
               : `<span class="meta">${row.product_id || row.id}</span>`;
             return `
-              <article class="product">
+              <article class="product ${isTargetHit(row) ? "target-hit" : ""}">
                 <div>
                   <div class="title">${rowTitle(row)}</div>
                   <div class="meta">${price}</div>
