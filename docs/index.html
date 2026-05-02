@@ -17,9 +17,7 @@
         --green: #087f5b;
       }
 
-      * {
-        box-sizing: border-box;
-      }
+      * { box-sizing: border-box; }
 
       body {
         margin: 0;
@@ -320,7 +318,7 @@
 
       form {
         display: grid;
-        grid-template-columns: 1.5fr 0.6fr 0.6fr;
+        grid-template-columns: minmax(220px, 1.5fr) minmax(100px, 0.45fr) minmax(100px, 0.45fr) minmax(120px, 0.5fr);
         gap: 10px;
       }
 
@@ -647,6 +645,10 @@
             Üst fiyat
             <input id="max-price" inputmode="numeric" placeholder="800" required />
           </label>
+          <label>
+            Beden
+            <input id="sizes" autocomplete="off" placeholder="M,L veya 34,36" />
+          </label>
           <div class="actions">
             <button type="submit">Ürün Ekle</button>
             <button class="secondary" id="refresh" type="button">Yenile</button>
@@ -701,6 +703,13 @@
         return text.replace(/\D/g, "");
       }
 
+      function sizesFrom(value) {
+        return value
+          .split(",")
+          .map((size) => size.trim())
+          .filter(Boolean);
+      }
+
       function rowTitle(row) {
         return row.name || row.product_id || row.product_url || "Ürün";
       }
@@ -714,12 +723,16 @@
         listEl.innerHTML = rows
           .map((row) => {
             const price = `${Number(row.target_price_min)}-${Number(row.target_price_max)} TL`;
+            const sizes = Array.isArray(row.target_sizes) && row.target_sizes.length
+              ? `Beden: ${row.target_sizes.join(", ")}`
+              : "Beden: fark etmez";
             const ref = row.product_url || row.product_id || row.id;
             return `
               <article class="product">
                 <div>
                   <div class="title">${rowTitle(row)}</div>
                   <div class="meta">${price}</div>
+                  <div class="meta">${sizes}</div>
                   <div class="meta">${ref}</div>
                 </div>
                 <button class="danger" data-id="${row.id}" type="button">Sil</button>
@@ -753,6 +766,7 @@
         const productValue = document.querySelector("#product").value.trim();
         const minPrice = Number(document.querySelector("#min-price").value.replace(",", "."));
         const maxPrice = Number(document.querySelector("#max-price").value.replace(",", "."));
+        const sizes = sizesFrom(document.querySelector("#sizes").value);
 
         if (!productValue || !Number.isFinite(minPrice) || !Number.isFinite(maxPrice)) {
           showMessage("Ürün ve fiyat aralığını doldur.", "err");
@@ -763,7 +777,8 @@
           product_url: /^https?:\/\//i.test(productValue) ? productValue : "",
           product_id: productIdFrom(productValue),
           target_price_min: minPrice,
-          target_price_max: maxPrice
+          target_price_max: maxPrice,
+          target_sizes: sizes
         };
 
         const response = await fetch(apiUrl(), {
