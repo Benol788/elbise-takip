@@ -604,6 +604,23 @@
           display: none;
         }
       }
+      .product-link {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        margin-top: 4px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        color: #1f63e9;
+        background: rgba(31, 99, 233, 0.09);
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+     }
+
+     .product-link:hover {
+       background: rgba(31, 99, 233, 0.15);
+    }
     </style>
   </head>
   <body>
@@ -751,6 +768,9 @@
             const lastChecked = checkedAtText(row.last_checked_at);
 
             const ref = row.product_url || row.product_id || row.id;
+            const linkHtml = row.product_url
+              ? `<a class="product-link" href="${row.product_url}" target="_blank" rel="noopener">Ürünü aç</a>`
+              : `<span class="meta">${row.product_id || row.id}</span>`;
             return `
               <article class="product">
                 <div>
@@ -761,7 +781,7 @@
                   <div class="meta">${lastStock}</div>
                   <div class="meta">${lastChecked}</div>
                   ${lastStatus ? `<div class="meta">${lastStatus}</div>` : ""}
-                  <div class="meta">${ref}</div>
+                  <div class="meta">${linkHtml}</div>
                 </div>
                 <button class="danger" data-id="${row.id}" type="button">Sil</button>
               </article>
