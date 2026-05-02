@@ -1,0 +1,39 @@
+name: Elbise Fiyat Stok Takibi
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Urunleri kontrol et
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python src/dress_watch.py --config config.json --once
+
+      - name: Bildirim durumunu kaydet
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/state.json
+          if git diff --cached --quiet; then
+            echo "Kaydedilecek yeni bildirim durumu yok."
+          else
+            git commit -m "Update dress watch state"
+            git pull --rebase
+            git push
+          fi
