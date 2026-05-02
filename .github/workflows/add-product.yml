@@ -3,9 +3,17 @@ name: Urun Ekle
 on:
   workflow_dispatch:
     inputs:
-      product_id:
-        description: "Trendyol urun kodu"
+      product:
+        description: "Trendyol urun linki veya urun kodu"
         required: true
+        type: string
+      min_price:
+        description: "Alt fiyat, ornek: 400"
+        required: false
+        type: string
+      max_price:
+        description: "Ust fiyat, ornek: 500"
+        required: false
         type: string
 
 permissions:
@@ -24,7 +32,7 @@ jobs:
           python-version: "3.12"
 
       - name: Urunu config dosyasina ekle
-        run: python src/add_product.py --config config.json --product-id "${{ inputs.product_id }}"
+        run: python src/add_product.py --config config.json --product "${{ inputs.product }}" --min-price "${{ inputs.min_price }}" --max-price "${{ inputs.max_price }}"
 
       - name: Degisikligi kaydet
         run: |
@@ -34,7 +42,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "Urun zaten listedeydi."
           else
-            git commit -m "Add product ${{ inputs.product_id }}"
+            git commit -m "Add product ${{ inputs.product }}"
             git pull --rebase
             git push
           fi
