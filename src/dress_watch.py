@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 
@@ -53,6 +53,41 @@ def request_text(url: str, timeout: int = 25) -> tuple[str, str]:
         return body, response.geturl()
 
 
+def request_json(url: str, headers: dict[str, str], timeout: int = 25) -> Any:
+    request = Request(url, headers=headers)
+    with urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def supabase_products() -> list[dict[str, Any]]:
+    supabase_url = os.environ.get("SUPABASE_URL", "").rstrip("/")
+    supabase_key = os.environ.get("SUPABASE_ANON_KEY", "")
+    if not supabase_url or not supabase_key:
+        return []
+
+    query = urlencode({"select": "*", "order": "created_at.asc"})
+    rows = request_json(
+        f"{supabase_url}/rest/v1/products?{query}",
+        {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {supabase_key}",
+        },
+    )
+    products = []
+    for row in rows:
+        product: dict[str, Any] = {
+            "name": row.get("name") or f"Ürün {row.get('product_id') or row.get('id')}",
+            "product_url": row.get("product_url") or "",
+            "product_id": row.get("product_id") or "",
+            "target_price_min": float(row.get("target_price_min") or 0),
+            "target_price_max": float(row.get("target_price_max") or 1_000_000),
+            "target_sizes": row.get("target_sizes") or [],
+            "color_keywords": row.get("color_keywords") or [],
+        }
+        products.append(product)
+    return products
+
+
 def candidate_urls(config: dict[str, Any]) -> list[str]:
     product_id = str(config.get("product_id", "")).strip()
     urls = []
@@ -78,7 +113,8 @@ def candidate_urls(config: dict[str, Any]) -> list[str]:
 
 
 def product_configs(config: dict[str, Any]) -> list[dict[str, Any]]:
-    products = config.get("products")
+    remote_products = supabase_products()
+    products = remote_products or config.get("products")
     if not isinstance(products, list):
         return [config]
 
