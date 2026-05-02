@@ -4,17 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Elbise Stok Takip</title>
+    <script src="./app-config.js"></script>
     <style>
       :root {
-        color-scheme: light;
         --bg: #f6f7f9;
         --text: #15171a;
         --muted: #606771;
-        --panel: #ffffff;
+        --panel: #fff;
         --border: #d9dee7;
-        --green: #0f7b4f;
         --blue: #175ddc;
         --red: #b42318;
+        --green: #0f7b4f;
       }
 
       * {
@@ -29,103 +29,181 @@
       }
 
       main {
-        width: min(920px, calc(100% - 32px));
+        width: min(960px, calc(100% - 28px));
         margin: 0 auto;
-        padding: 28px 0;
+        padding: 24px 0 36px;
       }
 
       header {
-        margin-bottom: 22px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
       }
 
       h1 {
-        margin: 0 0 8px;
-        font-size: 32px;
-        line-height: 1.15;
+        margin: 0 0 6px;
+        font-size: 30px;
       }
 
       p {
         margin: 0;
         color: var(--muted);
-        font-size: 16px;
         line-height: 1.45;
       }
 
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 14px;
+      .status {
+        min-width: 132px;
+        padding: 9px 11px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        font-size: 14px;
+        color: var(--muted);
+        text-align: center;
       }
 
-      a.card {
-        display: flex;
-        min-height: 170px;
-        padding: 18px;
-        flex-direction: column;
-        justify-content: space-between;
-        text-decoration: none;
-        color: inherit;
+      section {
         background: var(--panel);
         border: 1px solid var(--border);
         border-radius: 8px;
-      }
-
-      .icon {
-        width: 42px;
-        height: 42px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        color: #fff;
-        font-weight: 700;
-        font-size: 22px;
-      }
-
-      .green {
-        background: var(--green);
-      }
-
-      .blue {
-        background: var(--blue);
-      }
-
-      .red {
-        background: var(--red);
+        padding: 16px;
+        margin-bottom: 14px;
       }
 
       h2 {
-        margin: 18px 0 8px;
+        margin: 0 0 14px;
         font-size: 20px;
       }
 
-      .note {
-        margin-top: 18px;
-        padding: 14px 16px;
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 8px;
+      form {
+        display: grid;
+        grid-template-columns: 1.5fr 0.6fr 0.6fr;
+        gap: 10px;
       }
 
-      .note strong {
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      input {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 9px 10px;
+        font-size: 16px;
         color: var(--text);
+        background: #fff;
+      }
+
+      button {
+        min-height: 42px;
+        border: 0;
+        border-radius: 8px;
+        padding: 0 14px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        background: var(--blue);
+        cursor: pointer;
+      }
+
+      button.danger {
+        background: var(--red);
+      }
+
+      button.secondary {
+        background: #343942;
+      }
+
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .actions {
+        display: flex;
+        align-items: end;
+        gap: 10px;
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .product {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fbfcfe;
+      }
+
+      .title {
+        margin-bottom: 5px;
+        font-weight: 700;
+      }
+
+      .meta {
+        color: var(--muted);
+        font-size: 14px;
+        overflow-wrap: anywhere;
+      }
+
+      .empty {
+        padding: 18px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .message {
+        display: none;
+        margin-bottom: 14px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: #fff;
+      }
+
+      .message.ok {
+        display: block;
+        border-color: #a6d8bf;
+        color: var(--green);
+      }
+
+      .message.err {
+        display: block;
+        border-color: #efb5af;
+        color: var(--red);
       }
 
       @media (max-width: 760px) {
-        main {
-          width: min(100% - 24px, 920px);
-          padding-top: 20px;
-        }
-
-        h1 {
-          font-size: 28px;
-        }
-
-        .grid {
+        header,
+        form,
+        .product {
           grid-template-columns: 1fr;
         }
 
-        a.card {
-          min-height: 136px;
+        header {
+          display: block;
+        }
+
+        .status {
+          margin-top: 12px;
+          text-align: left;
+        }
+
+        .actions {
+          display: grid;
         }
       }
     </style>
@@ -133,39 +211,187 @@
   <body>
     <main>
       <header>
-        <h1>Elbise Stok Takip</h1>
-        <p>Ürün ekleme, ürün silme ve takip durumunu tek yerden aç.</p>
+        <div>
+          <h1>Elbise Stok Takip</h1>
+          <p>GitHub'a girmeden ürün ekle, sil ve takip listesini gör.</p>
+        </div>
+        <div id="status" class="status">Bağlanıyor</div>
       </header>
 
-      <section class="grid" aria-label="Kontroller">
-        <a class="card" href="https://github.com/Benol788/elbise-takip/actions/workflows/dress-watch.yml">
-          <div class="icon green">✓</div>
-          <div>
-            <h2>Takip Durumu</h2>
-            <p>Son kontrolleri, fiyatları, stok durumunu ve hataları gör.</p>
-          </div>
-        </a>
+      <div id="message" class="message"></div>
 
-        <a class="card" href="https://github.com/Benol788/elbise-takip/actions/workflows/add-product.yml">
-          <div class="icon blue">+</div>
-          <div>
-            <h2>Ürün Ekle</h2>
-            <p>Ürün linki veya kodu gir, fiyat aralığıyla takibe al.</p>
+      <section>
+        <h2>Ürün Ekle</h2>
+        <form id="add-form">
+          <label>
+            Ürün linki veya kodu
+            <input id="product" autocomplete="off" placeholder="https://... veya 1072453822" required />
+          </label>
+          <label>
+            Alt fiyat
+            <input id="min-price" inputmode="numeric" placeholder="500" required />
+          </label>
+          <label>
+            Üst fiyat
+            <input id="max-price" inputmode="numeric" placeholder="800" required />
+          </label>
+          <div class="actions">
+            <button type="submit">Ürün Ekle</button>
+            <button class="secondary" id="refresh" type="button">Yenile</button>
           </div>
-        </a>
-
-        <a class="card" href="https://github.com/Benol788/elbise-takip/actions/workflows/remove-product.yml">
-          <div class="icon red">−</div>
-          <div>
-            <h2>Ürün Sil</h2>
-            <p>İşin biten ürünü link veya ürün koduyla listeden kaldır.</p>
-          </div>
-        </a>
+        </form>
       </section>
 
-      <section class="note">
-        <p><strong>Not:</strong> Butonlar GitHub Actions ekranını açar. İşlem yapmak için GitHub hesabına giriş yapmış olman gerekir.</p>
+      <section>
+        <h2>Takip Listesi</h2>
+        <div id="products" class="list">
+          <div class="empty">Liste yükleniyor.</div>
+        </div>
       </section>
     </main>
+
+    <script>
+      const config = window.APP_CONFIG || {};
+      const statusEl = document.querySelector("#status");
+      const messageEl = document.querySelector("#message");
+      const listEl = document.querySelector("#products");
+      const formEl = document.querySelector("#add-form");
+      const refreshEl = document.querySelector("#refresh");
+
+      function apiUrl(path = "") {
+        return `${config.supabaseUrl.replace(/\/$/, "")}/rest/v1/products${path}`;
+      }
+
+      function headers(extra = {}) {
+        return {
+          apikey: config.supabaseAnonKey,
+          Authorization: `Bearer ${config.supabaseAnonKey}`,
+          "Content-Type": "application/json",
+          ...extra
+        };
+      }
+
+      function showMessage(text, type = "ok") {
+        messageEl.textContent = text;
+        messageEl.className = `message ${type}`;
+      }
+
+      function clearMessage() {
+        messageEl.textContent = "";
+        messageEl.className = "message";
+      }
+
+      function productIdFrom(value) {
+        const text = value.trim();
+        const match = text.match(/-p-(\d+)/);
+        if (match) return match[1];
+        if (/^https?:\/\//i.test(text)) return "";
+        return text.replace(/\D/g, "");
+      }
+
+      function rowTitle(row) {
+        return row.name || row.product_id || row.product_url || "Ürün";
+      }
+
+      function renderProducts(rows) {
+        if (!rows.length) {
+          listEl.innerHTML = '<div class="empty">Henüz ürün yok.</div>';
+          return;
+        }
+
+        listEl.innerHTML = rows
+          .map((row) => {
+            const price = `${Number(row.target_price_min)}-${Number(row.target_price_max)} TL`;
+            const ref = row.product_url || row.product_id || row.id;
+            return `
+              <article class="product">
+                <div>
+                  <div class="title">${rowTitle(row)}</div>
+                  <div class="meta">${price}</div>
+                  <div class="meta">${ref}</div>
+                </div>
+                <button class="danger" data-id="${row.id}" type="button">Sil</button>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      async function loadProducts() {
+        clearMessage();
+        if (!config.supabaseUrl || !config.supabaseAnonKey) {
+          statusEl.textContent = "Ayar eksik";
+          listEl.innerHTML = '<div class="empty">Supabase ayarları yapılmamış.</div>';
+          return;
+        }
+
+        statusEl.textContent = "Yükleniyor";
+        const response = await fetch(apiUrl("?select=*&order=created_at.asc"), {
+          headers: headers()
+        });
+        if (!response.ok) throw new Error("Liste alınamadı.");
+        const rows = await response.json();
+        renderProducts(rows);
+        statusEl.textContent = `${rows.length} ürün`;
+      }
+
+      async function addProduct(event) {
+        event.preventDefault();
+        clearMessage();
+        const productValue = document.querySelector("#product").value.trim();
+        const minPrice = Number(document.querySelector("#min-price").value.replace(",", "."));
+        const maxPrice = Number(document.querySelector("#max-price").value.replace(",", "."));
+
+        if (!productValue || !Number.isFinite(minPrice) || !Number.isFinite(maxPrice)) {
+          showMessage("Ürün ve fiyat aralığını doldur.", "err");
+          return;
+        }
+
+        const payload = {
+          product_url: /^https?:\/\//i.test(productValue) ? productValue : "",
+          product_id: productIdFrom(productValue),
+          target_price_min: minPrice,
+          target_price_max: maxPrice
+        };
+
+        const response = await fetch(apiUrl(), {
+          method: "POST",
+          headers: headers({ Prefer: "return=minimal" }),
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error("Ürün eklenemedi.");
+
+        formEl.reset();
+        showMessage("Ürün takip listesine eklendi.");
+        await loadProducts();
+      }
+
+      async function removeProduct(id) {
+        clearMessage();
+        const response = await fetch(apiUrl(`?id=eq.${encodeURIComponent(id)}`), {
+          method: "DELETE",
+          headers: headers()
+        });
+        if (!response.ok) throw new Error("Ürün silinemedi.");
+        showMessage("Ürün listeden silindi.");
+        await loadProducts();
+      }
+
+      formEl.addEventListener("submit", (event) => {
+        addProduct(event).catch((error) => showMessage(error.message, "err"));
+      });
+
+      refreshEl.addEventListener("click", () => {
+        loadProducts().catch((error) => showMessage(error.message, "err"));
+      });
+
+      listEl.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-id]");
+        if (!button) return;
+        removeProduct(button.dataset.id).catch((error) => showMessage(error.message, "err"));
+      });
+
+      loadProducts().catch((error) => showMessage(error.message, "err"));
+    </script>
   </body>
 </html>
