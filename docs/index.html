@@ -237,15 +237,9 @@
       }
 
       h1 {
-        margin: 0 0 6px;
+        margin: 0;
         font-size: 30px;
         color: #172554;
-      }
-
-      p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.45;
       }
 
       .status {
@@ -318,7 +312,13 @@
 
       form {
         display: grid;
-        grid-template-columns: minmax(220px, 1.4fr) minmax(100px, 0.4fr) minmax(100px, 0.4fr) minmax(110px, 0.45fr) minmax(120px, 0.5fr);
+        grid-template-columns:
+          minmax(210px, 1.4fr)
+          minmax(100px, 0.4fr)
+          minmax(100px, 0.4fr)
+          minmax(110px, 0.45fr)
+          minmax(120px, 0.5fr)
+          minmax(150px, 0.65fr);
         gap: 10px;
       }
 
@@ -330,7 +330,8 @@
         font-weight: 700;
       }
 
-      input {
+      input,
+      select {
         width: 100%;
         min-height: 42px;
         border: 1px solid #d8e0ee;
@@ -342,7 +343,8 @@
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
       }
 
-      input:focus {
+      input:focus,
+      select:focus {
         border-color: #7c9cff;
         box-shadow: 0 0 0 4px rgba(124, 156, 255, 0.16);
         outline: none;
@@ -415,8 +417,58 @@
         background: linear-gradient(180deg, #ff79ad, #7c9cff, #75d6a1);
       }
 
+      .product.target-hit {
+        border-color: rgba(8, 127, 91, 0.45);
+        background:
+          linear-gradient(135deg, rgba(236, 253, 245, 0.98), rgba(240, 253, 244, 0.94));
+        box-shadow: 0 12px 30px rgba(8, 127, 91, 0.16);
+      }
+
+      .product.target-hit::before {
+        background: linear-gradient(180deg, #22c55e, #86efac);
+      }
+
+      .product.target-hit .title::after {
+        content: " Uygun";
+        display: inline-flex;
+        margin-left: 8px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        color: #047857;
+        background: rgba(34, 197, 94, 0.14);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .product.favorite {
+        border-color: rgba(245, 158, 11, 0.45);
+        background:
+          linear-gradient(135deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 237, 0.94));
+        box-shadow: 0 12px 30px rgba(245, 158, 11, 0.14);
+      }
+
+      .product.favorite .title::before {
+        content: "★ ";
+        color: #f59e0b;
+      }
+
+      .product.target-hit.favorite {
+        border-color: rgba(8, 127, 91, 0.45);
+        background:
+          linear-gradient(135deg, rgba(236, 253, 245, 0.98), rgba(240, 253, 244, 0.94));
+      }
+
       .product > div {
         min-width: 0;
+      }
+
+      .product-actions {
+        display: grid;
+        gap: 8px;
+      }
+
+      .product-actions button {
+        min-width: 88px;
       }
 
       .title {
@@ -429,6 +481,24 @@
         color: var(--muted);
         font-size: 14px;
         overflow-wrap: anywhere;
+      }
+
+      .product-link {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        margin-top: 4px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        color: #1f63e9;
+        background: rgba(31, 99, 233, 0.09);
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .product-link:hover {
+        background: rgba(31, 99, 233, 0.15);
       }
 
       .empty {
@@ -484,10 +554,6 @@
           font-size: 25px;
         }
 
-        p {
-          font-size: 14px;
-        }
-
         .status {
           width: fit-content;
           min-width: 104px;
@@ -517,7 +583,8 @@
           font-size: 13px;
         }
 
-        input {
+        input,
+        select {
           min-height: 38px;
           padding: 7px 9px;
           font-size: 15px;
@@ -540,8 +607,12 @@
           padding: 10px;
         }
 
-        .product button {
+        .product-actions {
           grid-column: 1 / -1;
+        }
+
+        .product-actions button {
+          width: 100%;
         }
 
         .title {
@@ -604,79 +675,6 @@
           display: none;
         }
       }
-      .product-link {
-        display: inline-flex;
-        align-items: center;
-        width: fit-content;
-        margin-top: 4px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        color: #1f63e9;
-        background: rgba(31, 99, 233, 0.09);
-        font-size: 13px;
-        font-weight: 700;
-        text-decoration: none;
-     }
-
-     .product-link:hover {
-       background: rgba(31, 99, 233, 0.15);
-    }
-    .product-actions {
-      display: grid;
-      gap: 8px;
-    }
-
-    .product-actions button {
-      min-width: 88px;
-    }
-
-    @media (max-width: 760px) {
-      .product-actions {
-        grid-column: 1 / -1;
-      }
-    }
-
-    .product.target-hit {
-      border-color: rgba(8, 127, 91, 0.45);
-      background:
-        linear-gradient(135deg, rgba(236, 253, 245, 0.98), rgba(240, 253, 244, 0.94));
-      box-shadow: 0 12px 30px rgba(8, 127, 91, 0.16);
-    }
-
-    .product.target-hit::before {
-      background: linear-gradient(180deg, #22c55e, #86efac);
-    }
-
-    .product.target-hit .title::after {
-      content: "  Uygun";
-      display: inline-flex;
-      margin-left: 8px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      color: #047857;
-      background: rgba(34, 197, 94, 0.14);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .product.favorite {
-      border-color: rgba(245, 158, 11, 0.45);
-      background:
-        linear-gradient(135deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 237, 0.94));
-      box-shadow: 0 12px 30px rgba(245, 158, 11, 0.14);
-    }
-
-    .product.favorite .title::before {
-      content: "★ ";
-      color: #f59e0b;
-    }
-      
-    .product.target-hit.favorite {
-      border-color: rgba(8, 127, 91, 0.45);
-      background:
-        linear-gradient(135deg, rgba(236, 253, 245, 0.98), rgba(240, 253, 244, 0.94));
-    }
-
     </style>
   </head>
   <body>
@@ -694,9 +692,7 @@
 
     <main>
       <header>
-        <div>
-          <h1>Elbise Stok Takip</h1>
-        </div>
+        <h1>Elbise Stok Takip</h1>
         <div id="status" class="status">Bağlanıyor</div>
       </header>
 
@@ -705,7 +701,7 @@
       <section>
         <h2>Ürün Ekle</h2>
         <form id="add-form">
-          <input id="editing-id" type="hidden" />  
+          <input id="editing-id" type="hidden" />
           <label>
             Ürün adı
             <input id="name" autocomplete="off" placeholder="Mavi elbise" />
@@ -729,6 +725,14 @@
           <label>
             Renk
             <input id="colors" autocomplete="off" placeholder="mavi,lacivert" />
+          </label>
+          <label>
+            Bildirim tipi
+            <select id="alert-mode">
+              <option value="price_stock">Fiyat + stok uygunsa</option>
+              <option value="stock">Sadece stok varsa</option>
+              <option value="price">Sadece fiyat uygunsa</option>
+            </select>
           </label>
           <div class="actions">
             <button id="submit-button" type="submit">Ürün Ekle</button>
@@ -795,13 +799,13 @@
           .map((size) => size.trim())
           .filter(Boolean);
       }
-      
+
       function colorsFrom(value) {
         return value
           .split(",")
           .map((color) => color.trim().toLowerCase())
           .filter(Boolean);
-     }
+      }
 
       function exitEditMode() {
         editingIdEl.value = "";
@@ -809,9 +813,11 @@
         cancelEditEl.hidden = true;
         formEl.reset();
       }
+
       function rowTitle(row) {
         return row.name || row.product_id || row.product_url || "Ürün";
       }
+
       function checkedAtText(value) {
         if (!value) return "Son kontrol: henüz yok";
         const date = new Date(value);
@@ -823,30 +829,36 @@
           minute: "2-digit"
         })}`;
       }
-      
+
+      function alertModeText(value) {
+        if (value === "stock") return "Bildirim: sadece stok";
+        if (value === "price") return "Bildirim: sadece fiyat";
+        return "Bildirim: fiyat + stok";
+      }
+
       function isTargetHit(row) {
-       const price = Number(row.last_price);
-       const minPrice = Number(row.target_price_min);
-       const maxPrice = Number(row.target_price_max);
-       const priceOk = Number.isFinite(price) && price >= minPrice && price <= maxPrice;
-       const stockOk = row.last_stock_status === "var";
-       return priceOk && stockOk;
-    }
-      
+        const price = Number(row.last_price);
+        const minPrice = Number(row.target_price_min);
+        const maxPrice = Number(row.target_price_max);
+        const priceOk = Number.isFinite(price) && price >= minPrice && price <= maxPrice;
+        const stockOk = row.last_stock_status === "var";
+        return priceOk && stockOk;
+      }
+
       function renderProducts(rows) {
         if (!rows.length) {
           listEl.innerHTML = '<div class="empty">Henüz ürün yok.</div>';
           return;
         }
 
-      const sortedRows = [...rows].sort((a, b) => {
-        const targetOrder = Number(isTargetHit(b)) - Number(isTargetHit(a));
-        if (targetOrder !== 0) return targetOrder;
-        return Number(Boolean(b.is_favorite)) - Number(Boolean(a.is_favorite));
-      });
+        const sortedRows = [...rows].sort((a, b) => {
+          const targetOrder = Number(isTargetHit(b)) - Number(isTargetHit(a));
+          if (targetOrder !== 0) return targetOrder;
+          return Number(Boolean(b.is_favorite)) - Number(Boolean(a.is_favorite));
+        });
 
-      listEl.innerHTML = sortedRows
-         .map((row) => {
+        listEl.innerHTML = sortedRows
+          .map((row) => {
             const price = `${Number(row.target_price_min)}-${Number(row.target_price_max)} TL`;
             const sizes = Array.isArray(row.target_sizes) && row.target_sizes.length
               ? `Beden: ${row.target_sizes.join(", ")}`
@@ -857,16 +869,15 @@
             const lastPrice = row.last_price
               ? `Son fiyat: ${Number(row.last_price)} ${row.last_currency || "TL"}`
               : "Son fiyat: henüz yok";
-              const lastStock = row.last_stock_status
+            const lastStock = row.last_stock_status
               ? `Stok: ${row.last_stock_status}`
               : "Stok: henüz yok";
             const lastStatus = row.last_status ? `Durum: ${row.last_status}` : "";
             const lastChecked = checkedAtText(row.last_checked_at);
-
-            const ref = row.product_url || row.product_id || row.id;
             const linkHtml = row.product_url
               ? `<a class="product-link" href="${row.product_url}" target="_blank" rel="noopener">Ürünü aç</a>`
               : `<span class="meta">${row.product_id || row.id}</span>`;
+
             return `
               <article class="product ${isTargetHit(row) ? "target-hit" : ""} ${row.is_favorite ? "favorite" : ""}">
                 <div>
@@ -874,6 +885,7 @@
                   <div class="meta">${price}</div>
                   <div class="meta">${sizes}</div>
                   <div class="meta">${colors}</div>
+                  <div class="meta">${alertModeText(row.alert_mode)}</div>
                   <div class="meta">${lastPrice}</div>
                   <div class="meta">${lastStock}</div>
                   <div class="meta">${lastChecked}</div>
@@ -913,12 +925,14 @@
       async function addProduct(event) {
         event.preventDefault();
         clearMessage();
+
         const name = document.querySelector("#name").value.trim();
         const productValue = document.querySelector("#product").value.trim();
         const minPrice = Number(document.querySelector("#min-price").value.replace(",", "."));
         const maxPrice = Number(document.querySelector("#max-price").value.replace(",", "."));
         const sizes = sizesFrom(document.querySelector("#sizes").value);
         const colors = colorsFrom(document.querySelector("#colors").value);
+        const alertMode = document.querySelector("#alert-mode").value;
         const editingId = editingIdEl.value;
 
         if (!productValue || !Number.isFinite(minPrice) || !Number.isFinite(maxPrice)) {
@@ -932,56 +946,60 @@
           return (
             (newProductId && row.product_id === newProductId) ||
             (productValue.startsWith("http") && row.product_url === productValue)
-         );
-       });
+          );
+        });
 
-       if (duplicate) {
-         showMessage("Bu ürün zaten takip listesinde.", "err");
-         return;
-       }
+        if (duplicate) {
+          showMessage("Bu ürün zaten takip listesinde.", "err");
+          return;
+        }
 
         const payload = {
-           name: name,
+          name: name,
           product_url: /^https?:\/\//i.test(productValue) ? productValue : "",
           product_id: newProductId,
           target_price_min: minPrice,
           target_price_max: maxPrice,
           target_sizes: sizes,
-          color_keywords: colors
+          color_keywords: colors,
+          alert_mode: alertMode
         };
 
         const response = await fetch(
-         editingId ? apiUrl(`?id=eq.${encodeURIComponent(editingId)}`) : apiUrl(),
-         {
-          method: editingId ? "PATCH" : "POST",
-          headers: headers({ Prefer: "return=minimal" }),
-          body: JSON.stringify(payload)
+          editingId ? apiUrl(`?id=eq.${encodeURIComponent(editingId)}`) : apiUrl(),
+          {
+            method: editingId ? "PATCH" : "POST",
+            headers: headers({ Prefer: "return=minimal" }),
+            body: JSON.stringify(payload)
+          }
+        );
+        if (!response.ok) throw new Error(editingId ? "Ürün güncellenemedi." : "Ürün eklenemedi.");
+
+        showMessage(editingId ? "Ürün güncellendi." : "Ürün takip listesine eklendi.");
+        exitEditMode();
+        await loadProducts();
+      }
+
+      function editProduct(id) {
+        const row = currentRows.find((item) => item.id === id);
+        if (!row) {
+          showMessage("Düzenlenecek ürün bulunamadı.", "err");
+          return;
         }
-      );
-      if (!response.ok) throw new Error(editingId ? "Ürün güncellenemedi." : "Ürün eklenemedi.");
 
-      showMessage(editingId ? "Ürün güncellendi." : "Ürün takip listesine eklendi.");
-      exitEditMode();
-      await loadProducts();
-      }
-    function editProduct(id) {
-      const row = currentRows.find((item) => item.id === id);
-      if (!row) {
-        showMessage("Düzenlenecek ürün bulunamadı.", "err");
-        return;
+        editingIdEl.value = row.id;
+        document.querySelector("#name").value = row.name || "";
+        document.querySelector("#product").value = row.product_url || row.product_id || "";
+        document.querySelector("#min-price").value = row.target_price_min ?? "";
+        document.querySelector("#max-price").value = row.target_price_max ?? "";
+        document.querySelector("#sizes").value = Array.isArray(row.target_sizes) ? row.target_sizes.join(",") : "";
+        document.querySelector("#colors").value = Array.isArray(row.color_keywords) ? row.color_keywords.join(",") : "";
+        document.querySelector("#alert-mode").value = row.alert_mode || "price_stock";
+        submitButtonEl.textContent = "Kaydet";
+        cancelEditEl.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
-      editingIdEl.value = row.id;
-      document.querySelector("#name").value = row.name || "";
-      document.querySelector("#product").value = row.product_url || row.product_id || "";
-      document.querySelector("#min-price").value = row.target_price_min ?? "";
-      document.querySelector("#max-price").value = row.target_price_max ?? "";
-      document.querySelector("#sizes").value = Array.isArray(row.target_sizes) ? row.target_sizes.join(",") : "";
-      document.querySelector("#colors").value = Array.isArray(row.color_keywords) ? row.color_keywords.join(",") : "";
-      submitButtonEl.textContent = "Kaydet";
-      cancelEditEl.hidden = false;
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
       async function toggleFavorite(id) {
         const row = currentRows.find((item) => item.id === id);
         if (!row) {
@@ -998,6 +1016,7 @@
 
         await loadProducts();
       }
+
       async function removeProduct(id) {
         clearMessage();
         const response = await fetch(apiUrl(`?id=eq.${encodeURIComponent(id)}`), {
@@ -1016,11 +1035,11 @@
       refreshEl.addEventListener("click", () => {
         loadProducts().catch((error) => showMessage(error.message, "err"));
       });
-      
-        cancelEditEl.addEventListener("click", () => {
-          exitEditMode();
-          clearMessage();
-        });
+
+      cancelEditEl.addEventListener("click", () => {
+        exitEditMode();
+        clearMessage();
+      });
 
       listEl.addEventListener("click", (event) => {
         const favoriteButton = event.target.closest("button[data-favorite-id]");
@@ -1028,12 +1047,13 @@
           toggleFavorite(favoriteButton.dataset.favoriteId).catch((error) => showMessage(error.message, "err"));
           return;
         }
+
         const editButton = event.target.closest("button[data-edit-id]");
         if (editButton) {
           editProduct(editButton.dataset.editId);
           return;
         }
-        
+
         const button = event.target.closest("button[data-id]");
         if (!button) return;
         removeProduct(button.dataset.id).catch((error) => showMessage(error.message, "err"));
