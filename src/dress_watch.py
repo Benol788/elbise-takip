@@ -112,6 +112,7 @@ def supabase_products() -> list[dict[str, Any]]:
             "target_price_max": float(row.get("target_price_max") or 1_000_000),
             "target_sizes": row.get("target_sizes") or [],
             "color_keywords": row.get("color_keywords") or [],
+            "is_paused": bool(row.get("is_paused")),
             "alert_mode": row.get("alert_mode") or "price_stock",
         }
         products.append(product)
@@ -153,6 +154,7 @@ def product_configs(config: dict[str, Any]) -> list[dict[str, Any]]:
         "target_price_max",
         "target_sizes",
         "color_keywords",
+        "is_paused",
         "alert_mode",
         "ntfy_topic",
         "state_file",
@@ -171,6 +173,7 @@ def product_configs(config: dict[str, Any]) -> list[dict[str, Any]]:
         item.setdefault("target_price_max", 1_000_000)
         item.setdefault("target_sizes", [])
         item.setdefault("color_keywords", [])
+        item.setdefault("is_paused", False)
         item.setdefault("alert_mode", "price_stock")
         merged.append(item)
     return merged
@@ -550,11 +553,18 @@ def run_once(config: dict[str, Any], config_path: Path, force_notify: bool = Fal
     state_path = (config_path.parent / config.get("state_file", "data/state.json")).resolve()
     state = load_json(state_path) if state_path.exists() else {}
     snapshots = []
-    for index, product_config in enumerate(product_configs(config), start=1):
+     for index, product_config in enumerate(product_configs(config), start=1):
         if index > 1:
             print("")
+
+        if product_config.get("is_paused"):
+            name = product_config.get("name") or product_config.get("product_id") or product_config.get("product_url")
+            print(f"Ürün duraklatıldı, kontrol atlandı: {name}")
+            continue
+
         try:
             snapshots.append(run_product_once(product_config, config, config_path, state, force_notify))
+            
         except Exception as exc:
             name = product_config.get("name") or product_config.get("product_id") or product_config.get("product_url")
             print(f"Ürün kontrol edilemedi: {name}")
