@@ -1,0 +1,40 @@
+name: Urun Ekle
+
+on:
+  workflow_dispatch:
+    inputs:
+      product_id:
+        description: "Trendyol urun kodu"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Urunu config dosyasina ekle
+        run: python src/add_product.py --config config.json --product-id "${{ inputs.product_id }}"
+
+      - name: Degisikligi kaydet
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config.json
+          if git diff --cached --quiet; then
+            echo "Urun zaten listedeydi."
+          else
+            git commit -m "Add product ${{ inputs.product_id }}"
+            git pull --rebase
+            git push
+          fi
