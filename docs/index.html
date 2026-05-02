@@ -7,29 +7,33 @@
     <script src="./app-config.js"></script>
     <style>
       :root {
-        --bg: #f5f7fc;
-        --text: #111827;
-        --muted: #687385;
-        --panel: rgba(255, 255, 255, 0.94);
-        --border: #d9e1ee;
-        --blue: #2f6df6;
-        --red: #ef4444;
-        --green: #087f5b;
+        --text: #18264f;
+        --muted: #61708a;
+        --panel: rgba(255, 255, 255, 0.9);
+        --border: #dbe4f3;
+        --blue: #4f7cff;
+        --dark: #2f3b4f;
+        --red: #f54f63;
+        --green: #18b978;
+        --yellow: #f59e0b;
+        --shadow: 0 18px 42px rgba(44, 62, 100, 0.14);
       }
 
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
 
       body {
         margin: 0;
         min-height: 100vh;
-        overflow-x: hidden;
         font-family: Arial, Helvetica, sans-serif;
         color: var(--text);
         background:
-          radial-gradient(circle at 12% 8%, rgba(99, 149, 255, 0.35), transparent 25rem),
-          radial-gradient(circle at 88% 9%, rgba(255, 117, 166, 0.32), transparent 24rem),
-          radial-gradient(circle at 52% 100%, rgba(89, 191, 148, 0.22), transparent 30rem),
-          linear-gradient(180deg, #fff7fb 0, #edf4ff 18rem, var(--bg) 100%);
+          radial-gradient(circle at 10% 10%, rgba(92, 135, 255, 0.25), transparent 24rem),
+          radial-gradient(circle at 90% 8%, rgba(255, 110, 173, 0.28), transparent 24rem),
+          radial-gradient(circle at 50% 100%, rgba(80, 210, 170, 0.18), transparent 28rem),
+          linear-gradient(135deg, #eef5ff 0%, #fff4fb 48%, #f5fbff 100%);
+        overflow-x: hidden;
       }
 
       body::before {
@@ -38,242 +42,41 @@
         inset: 0;
         pointer-events: none;
         background-image:
-          linear-gradient(rgba(31, 99, 233, 0.055) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 80, 139, 0.045) 1px, transparent 1px);
+          linear-gradient(rgba(48, 74, 130, 0.055) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(48, 74, 130, 0.045) 1px, transparent 1px);
         background-size: 34px 34px;
-        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.65), transparent 72%);
-      }
-
-      .decor {
-        position: fixed;
-        inset: 0;
-        z-index: 1;
-        pointer-events: none;
-        overflow: hidden;
       }
 
       main {
         position: relative;
         z-index: 2;
-        width: min(960px, calc(100% - 28px));
+        width: min(960px, calc(100% - 24px));
         margin: 0 auto;
-        padding: 24px 0 36px;
+        padding: 16px 0 44px;
       }
 
-      .flower {
-        position: absolute;
-        width: var(--size);
-        height: var(--size);
-        opacity: 0.66;
-        filter: drop-shadow(0 14px 22px rgba(72, 84, 116, 0.13));
-      }
-
-      .flower::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(circle at 50% 50%, #ffe58a 0 7%, transparent 7.8%),
-          radial-gradient(ellipse at 50% 22%, var(--petal) 0 18%, transparent 18.8%),
-          radial-gradient(ellipse at 78% 38%, var(--petal) 0 18%, transparent 18.8%),
-          radial-gradient(ellipse at 67% 74%, var(--petal) 0 18%, transparent 18.8%),
-          radial-gradient(ellipse at 33% 74%, var(--petal) 0 18%, transparent 18.8%),
-          radial-gradient(ellipse at 22% 38%, var(--petal) 0 18%, transparent 18.8%);
-      }
-
-      .flower::after {
-        content: "";
-        position: absolute;
-        left: 49%;
-        top: 63%;
-        width: 8%;
-        height: 70%;
-        border-radius: 999px;
-        background: rgba(8, 127, 91, 0.36);
-        transform: rotate(var(--stem));
-        transform-origin: top;
-      }
-
-      .flower-left-large {
-        --size: 175px;
-        --petal: rgba(255, 95, 151, 0.52);
-        --stem: 16deg;
-        left: -58px;
-        bottom: 128px;
-        transform: rotate(-16deg);
-      }
-
-      .flower-left-small {
-        --size: 115px;
-        --petal: rgba(91, 136, 255, 0.38);
-        --stem: -10deg;
-        left: 22px;
-        bottom: 28px;
-        transform: rotate(14deg);
-      }
-
-      .flower-right-large {
-        --size: 215px;
-        --petal: rgba(255, 111, 173, 0.44);
-        --stem: -18deg;
-        right: -76px;
-        bottom: 80px;
-        transform: rotate(18deg);
-      }
-
-      .flower-right-small {
-        --size: 128px;
-        --petal: rgba(83, 190, 148, 0.34);
-        --stem: 12deg;
-        right: 44px;
-        bottom: -20px;
-        transform: rotate(-8deg);
-      }
-
-      .flower-bottom {
-        --size: 142px;
-        --petal: rgba(158, 111, 255, 0.3);
-        --stem: 0deg;
-        left: 49%;
-        bottom: -74px;
-        transform: translateX(-50%) rotate(5deg);
-      }
-
-      .butterfly {
-        position: absolute;
-        width: var(--size);
-        height: calc(var(--size) * 0.7);
-        opacity: 0.7;
-        transform: rotate(var(--rotate));
-        filter: drop-shadow(0 10px 14px rgba(72, 84, 116, 0.12));
-      }
-
-      .butterfly::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(ellipse at 35% 36%, var(--wing-a) 0 25%, transparent 26%),
-          radial-gradient(ellipse at 65% 36%, var(--wing-a) 0 25%, transparent 26%),
-          radial-gradient(ellipse at 39% 70%, var(--wing-b) 0 17%, transparent 18%),
-          radial-gradient(ellipse at 61% 70%, var(--wing-b) 0 17%, transparent 18%),
-          linear-gradient(90deg, transparent 47%, rgba(78, 58, 91, 0.72) 47% 53%, transparent 53%);
-      }
-
-      .butterfly-one {
-        --size: 64px;
-        --rotate: -18deg;
-        --wing-a: rgba(255, 95, 151, 0.46);
-        --wing-b: rgba(91, 136, 255, 0.33);
-        right: 78px;
-        top: 112px;
-      }
-
-      .butterfly-two {
-        --size: 48px;
-        --rotate: 22deg;
-        --wing-a: rgba(91, 136, 255, 0.36);
-        --wing-b: rgba(255, 95, 151, 0.36);
-        left: 42px;
-        top: 210px;
-      }
-
-      .butterfly-three {
-        --size: 42px;
-        --rotate: -8deg;
-        --wing-a: rgba(83, 190, 148, 0.3);
-        --wing-b: rgba(255, 190, 92, 0.42);
-        right: 28px;
-        top: 360px;
-      }
-
-      .bee {
-        position: absolute;
-        right: 132px;
-        top: 252px;
-        width: 54px;
-        height: 36px;
-        opacity: 0.72;
-        transform: rotate(10deg);
-        filter: drop-shadow(0 10px 14px rgba(72, 84, 116, 0.12));
-      }
-
-      .bee::before {
-        content: "";
-        position: absolute;
-        left: 8px;
-        top: 10px;
-        width: 36px;
-        height: 20px;
-        border-radius: 999px;
-        background:
-          linear-gradient(90deg, #f7c948 0 24%, #2f2933 24% 36%, #f7c948 36% 58%, #2f2933 58% 70%, #f7c948 70% 100%);
-      }
-
-      .bee::after {
-        content: "";
-        position: absolute;
-        left: 12px;
-        top: 1px;
-        width: 24px;
-        height: 14px;
-        border-radius: 999px 999px 45% 45%;
-        background: rgba(255, 255, 255, 0.72);
-        box-shadow: 15px 2px 0 rgba(255, 255, 255, 0.55);
+      header,
+      section {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(8px);
       }
 
       header {
         display: flex;
-        align-items: flex-start;
         justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 18px;
-        padding: 14px 16px;
-        border: 1px solid rgba(217, 225, 238, 0.75);
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.72);
-        box-shadow: 0 16px 38px rgba(34, 49, 84, 0.09);
-        backdrop-filter: blur(10px);
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        margin-bottom: 20px;
       }
 
       h1 {
         margin: 0;
-        font-size: 30px;
-        color: #172554;
-      }
-
-      .status {
-        min-width: 132px;
-        padding: 9px 12px;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        background: linear-gradient(135deg, #ffffff, #f7faff);
-        box-shadow: 0 8px 18px rgba(34, 49, 84, 0.08);
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--muted);
-        text-align: center;
-      }
-
-      section {
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(217, 225, 238, 0.8);
-        border-radius: 18px;
-        padding: 16px;
-        margin-bottom: 14px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(250, 252, 255, 0.9));
-        box-shadow: 0 18px 42px rgba(34, 49, 84, 0.12);
-        backdrop-filter: blur(8px);
-      }
-
-      section::before {
-        content: "";
-        position: absolute;
-        inset: 0 auto auto 0;
-        width: 100%;
-        height: 5px;
-        background: linear-gradient(90deg, #ff79ad, #7c9cff, #75d6a1);
+        font-size: clamp(26px, 5vw, 34px);
+        line-height: 1.05;
       }
 
       h2 {
@@ -281,103 +84,125 @@
         align-items: center;
         gap: 8px;
         margin: 0 0 14px;
-        font-size: 20px;
-        color: #172554;
+        font-size: 22px;
       }
 
-      section:first-of-type h2::before {
-        content: "+";
-        display: grid;
+      h2::before {
+        display: inline-grid;
         place-items: center;
         width: 24px;
         height: 24px;
-        border-radius: 999px;
-        color: #ffffff;
-        background: linear-gradient(135deg, #ff79ad, #7c9cff);
-        font-size: 18px;
-        line-height: 1;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 16px;
+      }
+
+      section:nth-of-type(1) h2::before {
+        content: "+";
+        background: linear-gradient(135deg, #ff7ab6, #6bd6a5);
       }
 
       section:nth-of-type(2) h2::before {
+        content: "=";
+        background: linear-gradient(135deg, #55c7d8, #7d8cff);
+      }
+
+      .status {
+        min-width: 132px;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.86);
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 800;
+        text-align: center;
+      }
+
+      section {
+        position: relative;
+        padding: 16px;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+
+      section::before {
         content: "";
-        width: 24px;
-        height: 24px;
-        border-radius: 8px;
-        background:
-          linear-gradient(#ffffff, #ffffff) 7px 7px / 10px 2px no-repeat,
-          linear-gradient(#ffffff, #ffffff) 7px 11px / 10px 2px no-repeat,
-          linear-gradient(#ffffff, #ffffff) 7px 15px / 10px 2px no-repeat,
-          linear-gradient(135deg, #75d6a1, #7c9cff);
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: linear-gradient(90deg, #ff74b7, #7a9cff, #6bd6a5);
       }
 
       form {
         display: grid;
-        grid-template-columns:
-          minmax(210px, 1.4fr)
-          minmax(100px, 0.4fr)
-          minmax(100px, 0.4fr)
-          minmax(110px, 0.45fr)
-          minmax(120px, 0.5fr)
-          minmax(150px, 0.65fr);
-        gap: 10px;
+        grid-template-columns: 1.6fr 0.95fr 0.55fr 0.55fr 0.65fr 0.75fr;
+        gap: 12px;
+        align-items: end;
       }
 
       label {
         display: grid;
         gap: 6px;
-        color: #475569;
+        color: #4c5970;
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 800;
       }
 
       input,
       select {
         width: 100%;
         min-height: 42px;
-        border: 1px solid #d8e0ee;
-        border-radius: 14px;
-        padding: 9px 10px;
-        font-size: 16px;
+        border: 1px solid #d7e1f0;
+        border-radius: 13px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.9);
         color: var(--text);
-        background: rgba(255, 255, 255, 0.96);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        font-size: 16px;
+        outline: none;
       }
 
       input:focus,
       select:focus {
-        border-color: #7c9cff;
-        box-shadow: 0 0 0 4px rgba(124, 156, 255, 0.16);
-        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.14);
+      }
+
+      .wide {
+        grid-column: span 2;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: end;
       }
 
       button {
         min-height: 42px;
         border: 0;
-        border-radius: 14px;
-        padding: 0 14px;
+        border-radius: 13px;
+        padding: 0 15px;
+        background: var(--blue);
+        color: white;
         font-size: 15px;
-        font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, #2f6df6, #7c9cff);
+        font-weight: 900;
         cursor: pointer;
-        box-shadow: 0 12px 24px rgba(47, 109, 246, 0.24);
-        transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+        box-shadow: 0 12px 24px rgba(79, 124, 255, 0.24);
+      }
+
+      button.secondary {
+        background: var(--dark);
+        box-shadow: 0 12px 24px rgba(47, 59, 79, 0.18);
+      }
+
+      button.danger {
+        background: var(--red);
+        box-shadow: 0 12px 24px rgba(245, 79, 99, 0.22);
       }
 
       button:hover {
         transform: translateY(-1px);
-        filter: brightness(1.02);
-        box-shadow: 0 16px 28px rgba(47, 109, 246, 0.28);
-      }
-
-      button.danger {
-        background: linear-gradient(135deg, #ef4444, #f97391);
-        box-shadow: 0 12px 22px rgba(239, 68, 68, 0.2);
-      }
-
-      button.secondary {
-        background: linear-gradient(135deg, #475569, #1f2937);
-        box-shadow: 0 12px 22px rgba(31, 41, 55, 0.18);
       }
 
       button:disabled {
@@ -385,81 +210,117 @@
         cursor: not-allowed;
       }
 
-      .actions {
-        display: flex;
-        align-items: end;
-        gap: 10px;
+      .message {
+        display: none;
+        margin-bottom: 14px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid var(--border);
+        font-weight: 800;
+        box-shadow: var(--shadow);
+      }
+
+      .message.ok {
+        display: block;
+        color: #087f5b;
+        border-color: #9ee4c0;
+      }
+
+      .message.err {
+        display: block;
+        color: #c92a2a;
+        border-color: #f3aab4;
       }
 
       .list {
         display: grid;
-        gap: 10px;
+        gap: 12px;
       }
 
       .product {
         display: grid;
-        grid-template-columns: 7px 1fr auto;
-        gap: 12px;
+        grid-template-columns: 1fr auto;
+        gap: 14px;
         align-items: center;
-        padding: 12px;
-        border: 1px solid rgba(217, 225, 238, 0.9);
+        padding: 14px;
+        border: 1px solid var(--border);
         border-radius: 16px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 255, 0.95));
-        box-shadow: 0 10px 26px rgba(34, 49, 84, 0.08);
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 10px 24px rgba(44, 62, 100, 0.08);
       }
 
       .product::before {
         content: "";
-        width: 7px;
-        height: 100%;
-        min-height: 54px;
+        grid-row: 1;
+        width: 6px;
+        align-self: stretch;
         border-radius: 999px;
-        background: linear-gradient(180deg, #ff79ad, #7c9cff, #75d6a1);
+        background: linear-gradient(#ff74b7, #6bd6a5);
+      }
+
+      .product > .product-body {
+        grid-column: 1;
       }
 
       .product.target-hit {
-        border-color: rgba(8, 127, 91, 0.45);
-        background:
-          linear-gradient(135deg, rgba(236, 253, 245, 0.98), rgba(240, 253, 244, 0.94));
-        box-shadow: 0 12px 30px rgba(8, 127, 91, 0.16);
-      }
-
-      .product.target-hit::before {
-        background: linear-gradient(180deg, #22c55e, #86efac);
-      }
-
-      .product.target-hit .title::after {
-        content: " Uygun";
-        display: inline-flex;
-        margin-left: 8px;
-        padding: 3px 8px;
-        border-radius: 999px;
-        color: #047857;
-        background: rgba(34, 197, 94, 0.14);
-        font-size: 12px;
-        font-weight: 800;
+        border-color: rgba(24, 185, 120, 0.55);
+        background: linear-gradient(135deg, rgba(232, 255, 243, 0.96), rgba(245, 255, 250, 0.86));
       }
 
       .product.favorite {
-        border-color: rgba(245, 158, 11, 0.45);
-        background:
-          linear-gradient(135deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 237, 0.94));
-        box-shadow: 0 12px 30px rgba(245, 158, 11, 0.14);
+        border-color: rgba(245, 158, 11, 0.55);
+        background: linear-gradient(135deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 237, 0.92));
       }
 
-      .product.favorite .title::before {
-        content: "★ ";
-        color: #f59e0b;
+      .product.paused {
+        opacity: 0.58;
       }
 
-      .product.target-hit.favorite {
-        border-color: rgba(8, 127, 91, 0.45);
-        background:
-          linear-gradient(135deg, rgba(236, 253, 245, 0.98), rgba(240, 253, 244, 0.94));
+      .title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-size: 17px;
+        font-weight: 900;
       }
 
-      .product > div {
-        min-width: 0;
+      .badge {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        border-radius: 999px;
+        padding: 4px 9px;
+        background: #dff8ea;
+        color: #087f5b;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .badge.paused-badge {
+        background: #eef1f6;
+        color: #61708a;
+      }
+
+      .meta {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+      }
+
+      .product-link {
+        display: inline-flex;
+        width: fit-content;
+        margin-top: 5px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(79, 124, 255, 0.1);
+        color: #1f63e9;
+        font-size: 13px;
+        font-weight: 900;
+        text-decoration: none;
       }
 
       .product-actions {
@@ -468,210 +329,265 @@
       }
 
       .product-actions button {
-        min-width: 88px;
-      }
-
-      .title {
-        margin-bottom: 5px;
-        font-weight: 700;
-        color: #172554;
-      }
-
-      .meta {
-        color: var(--muted);
-        font-size: 14px;
-        overflow-wrap: anywhere;
-      }
-
-      .product-link {
-        display: inline-flex;
-        align-items: center;
-        width: fit-content;
-        margin-top: 4px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        color: #1f63e9;
-        background: rgba(31, 99, 233, 0.09);
-        font-size: 13px;
-        font-weight: 700;
-        text-decoration: none;
-      }
-
-      .product-link:hover {
-        background: rgba(31, 99, 233, 0.15);
+        min-width: 118px;
       }
 
       .empty {
-        padding: 18px;
+        padding: 24px 14px;
         color: var(--muted);
         text-align: center;
-        border: 1px dashed #cbd5e1;
-        border-radius: 16px;
-        background: rgba(248, 251, 255, 0.8);
       }
 
-      .message {
-        display: none;
-        margin-bottom: 14px;
-        padding: 12px 14px;
-        border-radius: 16px;
-        border: 1px solid var(--border);
-        background: #fff;
+      .decor {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
       }
 
-      .message.ok {
-        display: block;
-        border-color: #a6d8bf;
-        color: var(--green);
+      .flower,
+      .butterfly,
+      .bee {
+        position: absolute;
+        opacity: 0.75;
       }
 
-      .message.err {
-        display: block;
-        border-color: #efb5af;
-        color: var(--red);
+      .flower {
+        width: 120px;
+        height: 150px;
       }
 
-      @media (max-width: 760px) {
+      .flower::before {
+        content: "";
+        position: absolute;
+        left: 52px;
+        top: 58px;
+        width: 10px;
+        height: 110px;
+        border-radius: 999px;
+        background: rgba(79, 155, 138, 0.45);
+      }
+
+      .flower::after {
+        content: "";
+        position: absolute;
+        left: 42px;
+        top: 40px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ffe585;
+        box-shadow:
+          -34px -8px 0 16px rgba(255, 125, 178, 0.38),
+          2px -30px 0 17px rgba(255, 125, 178, 0.35),
+          34px -8px 0 16px rgba(255, 125, 178, 0.36),
+          24px 28px 0 18px rgba(255, 125, 178, 0.33),
+          -26px 28px 0 18px rgba(255, 125, 178, 0.34);
+      }
+
+      .flower.blue::after {
+        box-shadow:
+          -30px -8px 0 14px rgba(112, 146, 255, 0.32),
+          4px -29px 0 15px rgba(112, 146, 255, 0.28),
+          34px -8px 0 14px rgba(112, 146, 255, 0.3),
+          24px 27px 0 16px rgba(112, 146, 255, 0.29),
+          -26px 27px 0 16px rgba(112, 146, 255, 0.31);
+      }
+
+      .flower.green::after {
+        box-shadow:
+          -30px -8px 0 15px rgba(88, 207, 169, 0.28),
+          4px -29px 0 16px rgba(88, 207, 169, 0.25),
+          34px -8px 0 15px rgba(88, 207, 169, 0.27),
+          24px 27px 0 17px rgba(88, 207, 169, 0.25),
+          -26px 27px 0 17px rgba(88, 207, 169, 0.27);
+      }
+
+      .butterfly {
+        width: 42px;
+        height: 36px;
+      }
+
+      .butterfly::before {
+        content: "";
+        position: absolute;
+        inset: 8px 18px 4px;
+        width: 5px;
+        border-radius: 999px;
+        background: rgba(58, 68, 96, 0.35);
+        transform: rotate(-16deg);
+      }
+
+      .butterfly::after {
+        content: "";
+        position: absolute;
+        left: 8px;
+        top: 8px;
+        width: 16px;
+        height: 13px;
+        border-radius: 70% 50%;
+        background: rgba(255, 103, 162, 0.45);
+        box-shadow:
+          15px -3px 0 1px rgba(255, 103, 162, 0.38),
+          0 13px 0 -1px rgba(101, 151, 255, 0.35),
+          17px 11px 0 -1px rgba(101, 151, 255, 0.32);
+      }
+
+      .bee {
+        width: 44px;
+        height: 30px;
+      }
+
+      .bee::before {
+        content: "";
+        position: absolute;
+        left: 8px;
+        top: 9px;
+        width: 30px;
+        height: 16px;
+        border-radius: 999px;
+        background:
+          linear-gradient(90deg, transparent 0 22%, rgba(61, 51, 53, 0.7) 22% 34%, transparent 34% 53%, rgba(61, 51, 53, 0.7) 53% 65%, transparent 65%),
+          #ffd45c;
+      }
+
+      .bee::after {
+        content: "";
+        position: absolute;
+        left: 14px;
+        top: 1px;
+        width: 13px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.62);
+        box-shadow: 12px 0 0 rgba(255, 255, 255, 0.5);
+      }
+
+      .flower-left {
+        left: -44px;
+        bottom: 48px;
+      }
+
+      .flower-left-small {
+        left: 6px;
+        bottom: -16px;
+      }
+
+      .flower-right {
+        right: -48px;
+        bottom: 74px;
+      }
+
+      .flower-right-small {
+        right: 12px;
+        bottom: -20px;
+      }
+
+      .flower-bottom {
+        left: 46%;
+        bottom: -92px;
+      }
+
+      .butterfly-left {
+        left: 42px;
+        top: 23%;
+      }
+
+      .butterfly-right {
+        right: 46px;
+        top: 13%;
+      }
+
+      .butterfly-small {
+        right: 24px;
+        top: 39%;
+        transform: scale(0.8);
+      }
+
+      .bee-one {
+        right: 132px;
+        top: 28%;
+      }
+
+      @media (max-width: 860px) {
         main {
           width: min(100% - 18px, 960px);
-          padding: 16px 0 24px;
+          padding-top: 12px;
         }
 
-        header,
+        header {
+          padding: 14px;
+        }
+
+        form {
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+
+        .wide {
+          grid-column: span 2;
+        }
+
+        .actions {
+          grid-column: span 2;
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .product {
+          grid-template-columns: 1fr;
+          padding: 12px;
+        }
+
+        .product-actions {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .product-actions button {
+          min-width: 0;
+          width: 100%;
+        }
+
+        .flower {
+          transform: scale(0.78);
+        }
+
+        .bee-one,
+        .butterfly-left,
+        .butterfly-right {
+          opacity: 0.45;
+        }
+      }
+
+      @media (max-width: 520px) {
+        header {
+          align-items: flex-start;
+        }
+
+        .status {
+          min-width: 92px;
+          padding: 9px 12px;
+        }
+
         form {
           grid-template-columns: 1fr;
         }
 
-        header {
-          display: block;
-          margin-bottom: 12px;
-          padding: 12px;
-          border-radius: 16px;
-        }
-
-        h1 {
-          margin-bottom: 4px;
-          font-size: 25px;
-        }
-
-        .status {
-          width: fit-content;
-          min-width: 104px;
-          margin-top: 10px;
-          padding: 7px 9px;
-          font-size: 13px;
-          text-align: left;
-        }
-
-        section {
-          padding: 12px;
-          margin-bottom: 10px;
-          border-radius: 16px;
-        }
-
-        h2 {
-          margin-bottom: 10px;
-          font-size: 18px;
-        }
-
-        form {
-          gap: 8px;
-        }
-
-        label {
-          gap: 4px;
-          font-size: 13px;
-        }
-
-        input,
-        select {
-          min-height: 38px;
-          padding: 7px 9px;
-          font-size: 15px;
-        }
-
-        button {
-          min-height: 38px;
-          padding: 0 12px;
-          font-size: 14px;
+        .wide,
+        .actions {
+          grid-column: auto;
         }
 
         .actions {
-          display: grid;
-          gap: 8px;
-        }
-
-        .product {
-          grid-template-columns: 7px 1fr;
-          gap: 8px;
-          padding: 10px;
+          grid-template-columns: 1fr 1fr;
         }
 
         .product-actions {
-          grid-column: 1 / -1;
+          grid-template-columns: 1fr;
         }
 
-        .product-actions button {
-          width: 100%;
-        }
-
-        .title {
-          margin-bottom: 3px;
-          font-size: 15px;
-        }
-
-        .meta {
-          font-size: 12px;
-        }
-
-        .empty {
-          padding: 12px;
-          font-size: 14px;
-        }
-
-        .flower-left-large {
-          left: -70px;
-          bottom: 112px;
-          opacity: 0.82;
-        }
-
-        .flower-left-small {
-          left: -18px;
-          bottom: 18px;
-          opacity: 0.8;
-        }
-
-        .flower-right-large {
-          right: -92px;
-          bottom: 76px;
-          opacity: 0.82;
-        }
-
-        .flower-right-small {
-          right: -10px;
-          bottom: -16px;
-          opacity: 0.78;
-        }
-
-        .flower-bottom {
-          bottom: -70px;
-          opacity: 0.5;
-        }
-
-        .butterfly-one {
-          right: 10px;
-          top: 82px;
-          opacity: 0.8;
-        }
-
-        .butterfly-two {
-          left: 6px;
-          top: 152px;
-          opacity: 0.78;
-        }
-
-        .butterfly-three,
-        .bee {
+        .flower-left,
+        .flower-right {
           display: none;
         }
       }
@@ -679,15 +595,15 @@
   </head>
   <body>
     <div class="decor" aria-hidden="true">
-      <span class="flower flower-left-large"></span>
-      <span class="flower flower-left-small"></span>
-      <span class="flower flower-right-large"></span>
-      <span class="flower flower-right-small"></span>
-      <span class="flower flower-bottom"></span>
-      <span class="butterfly butterfly-one"></span>
-      <span class="butterfly butterfly-two"></span>
-      <span class="butterfly butterfly-three"></span>
-      <span class="bee"></span>
+      <span class="flower flower-left"></span>
+      <span class="flower blue flower-left-small"></span>
+      <span class="flower flower-right"></span>
+      <span class="flower green flower-right-small"></span>
+      <span class="flower blue flower-bottom"></span>
+      <span class="butterfly butterfly-left"></span>
+      <span class="butterfly butterfly-right"></span>
+      <span class="butterfly butterfly-small"></span>
+      <span class="bee bee-one"></span>
     </div>
 
     <main>
@@ -702,31 +618,38 @@
         <h2>Ürün Ekle</h2>
         <form id="add-form">
           <input id="editing-id" type="hidden" />
-          <label>
+
+          <label class="wide">
             Ürün adı
             <input id="name" autocomplete="off" placeholder="Mavi elbise" />
           </label>
+
           <label>
             Ürün linki veya kodu
             <input id="product" autocomplete="off" placeholder="https://... veya 1072453822" required />
           </label>
+
           <label>
             Alt fiyat
             <input id="min-price" inputmode="numeric" placeholder="500" required />
           </label>
+
           <label>
             Üst fiyat
             <input id="max-price" inputmode="numeric" placeholder="800" required />
           </label>
+
           <label>
             Beden
             <input id="sizes" autocomplete="off" placeholder="M,L veya 34,36" />
           </label>
+
           <label>
             Renk
             <input id="colors" autocomplete="off" placeholder="mavi,lacivert" />
           </label>
-          <label>
+
+          <label class="wide">
             Bildirim tipi
             <select id="alert-mode">
               <option value="price_stock">Fiyat + stok uygunsa</option>
@@ -734,6 +657,7 @@
               <option value="price">Sadece fiyat uygunsa</option>
             </select>
           </label>
+
           <div class="actions">
             <button id="submit-button" type="submit">Ürün Ekle</button>
             <button class="secondary" id="refresh" type="button">Yenile</button>
@@ -793,25 +717,11 @@
         return text.replace(/\D/g, "");
       }
 
-      function sizesFrom(value) {
+      function listFrom(value) {
         return value
           .split(",")
-          .map((size) => size.trim())
+          .map((item) => item.trim())
           .filter(Boolean);
-      }
-
-      function colorsFrom(value) {
-        return value
-          .split(",")
-          .map((color) => color.trim().toLowerCase())
-          .filter(Boolean);
-      }
-
-      function exitEditMode() {
-        editingIdEl.value = "";
-        submitButtonEl.textContent = "Ürün Ekle";
-        cancelEditEl.hidden = true;
-        formEl.reset();
       }
 
       function rowTitle(row) {
@@ -842,7 +752,24 @@
         const maxPrice = Number(row.target_price_max);
         const priceOk = Number.isFinite(price) && price >= minPrice && price <= maxPrice;
         const stockOk = row.last_stock_status === "var";
-        return priceOk && stockOk;
+        return priceOk && stockOk && !row.is_paused;
+      }
+
+      function productRef(row) {
+        return row.product_url || row.product_id || row.id;
+      }
+
+      function linkHtml(row) {
+        const ref = productRef(row);
+        if (!row.product_url) return `<span class="meta">${ref}</span>`;
+        return `<a class="product-link" href="${row.product_url}" target="_blank" rel="noreferrer">Ürünü aç</a>`;
+      }
+
+      function exitEditMode() {
+        editingIdEl.value = "";
+        submitButtonEl.textContent = "Ürün Ekle";
+        cancelEditEl.hidden = true;
+        formEl.reset();
       }
 
       function renderProducts(rows) {
@@ -852,9 +779,7 @@
         }
 
         const sortedRows = [...rows].sort((a, b) => {
-          const targetOrder = Number(isTargetHit(b)) - Number(isTargetHit(a));
-          if (targetOrder !== 0) return targetOrder;
-          return Number(Boolean(b.is_favorite)) - Number(Boolean(a.is_favorite));
+          return Number(isTargetHit(b)) - Number(isTargetHit(a)) || Number(b.is_favorite) - Number(a.is_favorite);
         });
 
         listEl.innerHTML = sortedRows
@@ -874,14 +799,23 @@
               : "Stok: henüz yok";
             const lastStatus = row.last_status ? `Durum: ${row.last_status}` : "";
             const lastChecked = checkedAtText(row.last_checked_at);
-            const linkHtml = row.product_url
-              ? `<a class="product-link" href="${row.product_url}" target="_blank" rel="noopener">Ürünü aç</a>`
-              : `<span class="meta">${row.product_id || row.id}</span>`;
+            const hit = isTargetHit(row);
+            const classes = [
+              "product",
+              hit ? "target-hit" : "",
+              row.is_favorite ? "favorite" : "",
+              row.is_paused ? "paused" : ""
+            ].filter(Boolean).join(" ");
 
             return `
-              <article class="product ${isTargetHit(row) ? "target-hit" : ""} ${row.is_favorite ? "favorite" : ""}">
-                <div>
-                  <div class="title">${rowTitle(row)}</div>
+              <article class="${classes}">
+                <div class="product-body">
+                  <div class="title">
+                    ${row.is_favorite ? "★" : ""}
+                    ${rowTitle(row)}
+                    ${hit ? '<span class="badge">Uygun</span>' : ""}
+                    ${row.is_paused ? '<span class="badge paused-badge">Duraklatıldı</span>' : ""}
+                  </div>
                   <div class="meta">${price}</div>
                   <div class="meta">${sizes}</div>
                   <div class="meta">${colors}</div>
@@ -890,10 +824,11 @@
                   <div class="meta">${lastStock}</div>
                   <div class="meta">${lastChecked}</div>
                   ${lastStatus ? `<div class="meta">${lastStatus}</div>` : ""}
-                  <div class="meta">${linkHtml}</div>
+                  ${linkHtml(row)}
                 </div>
                 <div class="product-actions">
                   <button class="secondary" data-favorite-id="${row.id}" type="button">${row.is_favorite ? "Favoriden çıkar" : "Favori"}</button>
+                  <button class="secondary" data-pause-id="${row.id}" type="button">${row.is_paused ? "Devam et" : "Duraklat"}</button>
                   <button class="secondary" data-edit-id="${row.id}" type="button">Düzenle</button>
                   <button class="danger" data-id="${row.id}" type="button">Sil</button>
                 </div>
@@ -916,48 +851,45 @@
           headers: headers()
         });
         if (!response.ok) throw new Error("Liste alınamadı.");
-        const rows = await response.json();
-        currentRows = rows;
-        renderProducts(rows);
-        statusEl.textContent = `${rows.length} ürün`;
+        currentRows = await response.json();
+        renderProducts(currentRows);
+        statusEl.textContent = `${currentRows.length} ürün`;
       }
 
-      async function addProduct(event) {
+      async function saveProduct(event) {
         event.preventDefault();
         clearMessage();
 
+        const editingId = editingIdEl.value;
         const name = document.querySelector("#name").value.trim();
         const productValue = document.querySelector("#product").value.trim();
         const minPrice = Number(document.querySelector("#min-price").value.replace(",", "."));
         const maxPrice = Number(document.querySelector("#max-price").value.replace(",", "."));
-        const sizes = sizesFrom(document.querySelector("#sizes").value);
-        const colors = colorsFrom(document.querySelector("#colors").value);
+        const sizes = listFrom(document.querySelector("#sizes").value);
+        const colors = listFrom(document.querySelector("#colors").value).map((color) => color.toLowerCase());
         const alertMode = document.querySelector("#alert-mode").value;
-        const editingId = editingIdEl.value;
 
         if (!productValue || !Number.isFinite(minPrice) || !Number.isFinite(maxPrice)) {
           showMessage("Ürün ve fiyat aralığını doldur.", "err");
           return;
         }
 
-        const newProductId = productIdFrom(productValue);
-        const duplicate = currentRows.some((row) => {
+        const productId = productIdFrom(productValue);
+        const productUrl = /^https?:\/\//i.test(productValue) ? productValue : "";
+        const duplicate = currentRows.find((row) => {
           if (editingId && row.id === editingId) return false;
-          return (
-            (newProductId && row.product_id === newProductId) ||
-            (productValue.startsWith("http") && row.product_url === productValue)
-          );
+          return (productId && row.product_id === productId) || (productUrl && row.product_url === productUrl);
         });
 
         if (duplicate) {
-          showMessage("Bu ürün zaten takip listesinde.", "err");
+          showMessage("Bu ürün zaten listede var.", "err");
           return;
         }
 
         const payload = {
           name: name,
-          product_url: /^https?:\/\//i.test(productValue) ? productValue : "",
-          product_id: newProductId,
+          product_url: productUrl,
+          product_id: productId,
           target_price_min: minPrice,
           target_price_max: maxPrice,
           target_sizes: sizes,
@@ -1017,6 +949,23 @@
         await loadProducts();
       }
 
+      async function togglePaused(id) {
+        const row = currentRows.find((item) => item.id === id);
+        if (!row) {
+          showMessage("Ürün bulunamadı.", "err");
+          return;
+        }
+
+        const response = await fetch(apiUrl(`?id=eq.${encodeURIComponent(id)}`), {
+          method: "PATCH",
+          headers: headers({ Prefer: "return=minimal" }),
+          body: JSON.stringify({ is_paused: !row.is_paused })
+        });
+        if (!response.ok) throw new Error("Duraklatma bilgisi güncellenemedi.");
+
+        await loadProducts();
+      }
+
       async function removeProduct(id) {
         clearMessage();
         const response = await fetch(apiUrl(`?id=eq.${encodeURIComponent(id)}`), {
@@ -1029,7 +978,7 @@
       }
 
       formEl.addEventListener("submit", (event) => {
-        addProduct(event).catch((error) => showMessage(error.message, "err"));
+        saveProduct(event).catch((error) => showMessage(error.message, "err"));
       });
 
       refreshEl.addEventListener("click", () => {
@@ -1045,6 +994,12 @@
         const favoriteButton = event.target.closest("button[data-favorite-id]");
         if (favoriteButton) {
           toggleFavorite(favoriteButton.dataset.favoriteId).catch((error) => showMessage(error.message, "err"));
+          return;
+        }
+
+        const pauseButton = event.target.closest("button[data-pause-id]");
+        if (pauseButton) {
+          togglePaused(pauseButton.dataset.pauseId).catch((error) => showMessage(error.message, "err"));
           return;
         }
 
