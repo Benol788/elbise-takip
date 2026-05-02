@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,20 @@ def normalize_product_id(product_id: str) -> str:
     return digits
 
 
+def product_id_from_link_or_code(value: str) -> str:
+    text = value.strip()
+    match = re.search(r"-p-(\d+)", text)
+    if match:
+        return match.group(1)
+    return normalize_product_id(text)
+
+
+def optional_price(value: str | None) -> int | None:
+    if value is None or not value.strip():
+        return None
+    return int(float(value.replace(",", ".")))
+
+
 def product_exists(products: list[Any], product_id: str) -> bool:
     for product in products:
         if isinstance(product, str) and product == product_id:
@@ -34,9 +49,11 @@ def product_exists(products: list[Any], product_id: str) -> bool:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="config.json içine Trendyol ürün kodu ekler")
+    parser = argparse.ArgumentParser(description="config.json içine Trendyol ürünü ekler")
     parser.add_argument("--config", default="config.json")
-    parser.add_argument("--product-id", required=True)
+    parser.add_argument("--product", required=True, help="Trendyol ürün linki veya ürün kodu")
+    parser.add_argument("--min-price")
+    parser.add_argument("--max-price")
     args = parser.parse_args()
 
     config_path = Path(args.config)
@@ -45,12 +62,24 @@ def main() -> None:
     if not isinstance(products, list):
         raise ValueError("config.json içindeki products alanı liste olmalı.")
 
-    product_id = normalize_product_id(args.product_id)
+    product_id = product_id_from_link_or_code(args.product)
     if product_exists(products, product_id):
         print(f"{product_id} zaten takip listesinde.")
         return
 
-    products.append(product_id)
+    min_price = optional_price(args.min_price)
+    max_price = optional_price(args.max_price)
+    if min_price is not None and max_price is not None:
+        product: Any = {
+            "product_url": args.product.strip() if args.product.strip().startswith("http") else "",
+            "product_id": product_id,
+            "target_price_min": min_price,
+            "target_price_max": max_price,
+        }
+    else:
+        product = product_id
+
+    products.append(product)
     save_config(config_path, config)
     print(f"{product_id} takip listesine eklendi.")
 
