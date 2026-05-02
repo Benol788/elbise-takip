@@ -30,6 +30,8 @@ def product_id_from_link_or_code(value: str) -> str:
     match = re.search(r"-p-(\d+)", text)
     if match:
         return match.group(1)
+    if text.startswith("http"):
+        return ""
     return normalize_product_id(text)
 
 
@@ -63,25 +65,28 @@ def main() -> None:
         raise ValueError("config.json içindeki products alanı liste olmalı.")
 
     product_id = product_id_from_link_or_code(args.product)
-    if product_exists(products, product_id):
-        print(f"{product_id} zaten takip listesinde.")
+    product_url = args.product.strip() if args.product.strip().startswith("http") else ""
+    exists_key = product_id or product_url
+    if product_exists(products, exists_key):
+        print(f"{exists_key} zaten takip listesinde.")
         return
 
     min_price = optional_price(args.min_price)
     max_price = optional_price(args.max_price)
     if min_price is not None and max_price is not None:
         product: Any = {
-            "product_url": args.product.strip() if args.product.strip().startswith("http") else "",
-            "product_id": product_id,
+            "product_url": product_url,
             "target_price_min": min_price,
             "target_price_max": max_price,
         }
+        if product_id:
+            product["product_id"] = product_id
     else:
-        product = product_id
+        product = product_id if product_id else {"product_url": product_url}
 
     products.append(product)
     save_config(config_path, config)
-    print(f"{product_id} takip listesine eklendi.")
+    print(f"{exists_key} takip listesine eklendi.")
 
 
 if __name__ == "__main__":
