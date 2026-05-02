@@ -7,10 +7,10 @@
     <script src="./app-config.js"></script>
     <style>
       :root {
-        --bg: #f4f6fb;
+        --bg: #f5f7fc;
         --text: #111827;
         --muted: #687385;
-        --panel: #fff;
+        --panel: rgba(255, 255, 255, 0.94);
         --border: #d9e1ee;
         --blue: #1f63e9;
         --red: #c92a2a;
@@ -23,15 +23,15 @@
 
       body {
         margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background:
-          radial-gradient(circle at 10% 8%, rgba(31, 99, 233, 0.34), transparent 25rem),
-          radial-gradient(circle at 88% 10%, rgba(255, 80, 139, 0.32), transparent 23rem),
-          radial-gradient(circle at 50% 100%, rgba(8, 127, 91, 0.2), transparent 30rem),
-          linear-gradient(180deg, #fff7fb 0, #edf4ff 18rem, var(--bg) 100%);
-        color: var(--text);
         min-height: 100vh;
-        position: relative;
+        overflow-x: hidden;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 12% 8%, rgba(99, 149, 255, 0.35), transparent 25rem),
+          radial-gradient(circle at 88% 9%, rgba(255, 117, 166, 0.32), transparent 24rem),
+          radial-gradient(circle at 52% 100%, rgba(89, 191, 148, 0.22), transparent 30rem),
+          linear-gradient(180deg, #fff7fb 0, #edf4ff 18rem, var(--bg) 100%);
       }
 
       body::before {
@@ -40,43 +40,188 @@
         inset: 0;
         pointer-events: none;
         background-image:
-          linear-gradient(rgba(31, 99, 233, 0.07) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 80, 139, 0.06) 1px, transparent 1px);
+          linear-gradient(rgba(31, 99, 233, 0.055) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 80, 139, 0.045) 1px, transparent 1px);
         background-size: 34px 34px;
-        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 72%);
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.65), transparent 72%);
       }
 
-      body::after {
-        content: "";
+      .decor {
         position: fixed;
-        inset: auto -80px -90px auto;
-        width: min(420px, 78vw);
-        aspect-ratio: 1;
+        inset: 0;
+        z-index: 1;
         pointer-events: none;
-        opacity: 0.55;
-        background:
-          radial-gradient(circle at 45% 42%, rgba(255, 255, 255, 0.95) 0 3%, transparent 3.4%),
-          radial-gradient(ellipse at 45% 31%, rgba(255, 80, 139, 0.48) 0 8%, transparent 8.6%),
-          radial-gradient(ellipse at 56% 39%, rgba(255, 80, 139, 0.42) 0 8%, transparent 8.6%),
-          radial-gradient(ellipse at 52% 53%, rgba(255, 80, 139, 0.45) 0 8%, transparent 8.6%),
-          radial-gradient(ellipse at 36% 52%, rgba(255, 80, 139, 0.38) 0 8%, transparent 8.6%),
-          radial-gradient(ellipse at 33% 38%, rgba(255, 80, 139, 0.44) 0 8%, transparent 8.6%),
-          radial-gradient(circle at 72% 62%, rgba(255, 255, 255, 0.9) 0 2.4%, transparent 2.8%),
-          radial-gradient(ellipse at 72% 53%, rgba(31, 99, 233, 0.35) 0 6.5%, transparent 7%),
-          radial-gradient(ellipse at 80% 62%, rgba(31, 99, 233, 0.32) 0 6.5%, transparent 7%),
-          radial-gradient(ellipse at 72% 71%, rgba(31, 99, 233, 0.33) 0 6.5%, transparent 7%),
-          radial-gradient(ellipse at 64% 62%, rgba(31, 99, 233, 0.3) 0 6.5%, transparent 7%),
-          radial-gradient(ellipse at 52% 74%, rgba(8, 127, 91, 0.22) 0 10%, transparent 10.8%),
-          radial-gradient(ellipse at 82% 82%, rgba(8, 127, 91, 0.18) 0 12%, transparent 12.8%);
-        filter: blur(0.2px);
+        overflow: hidden;
       }
 
       main {
         position: relative;
-        z-index: 1;
+        z-index: 2;
         width: min(960px, calc(100% - 28px));
         margin: 0 auto;
         padding: 24px 0 36px;
+      }
+
+      .flower {
+        position: absolute;
+        width: var(--size);
+        height: var(--size);
+        opacity: 0.66;
+        filter: drop-shadow(0 14px 22px rgba(72, 84, 116, 0.13));
+      }
+
+      .flower::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 50% 50%, #ffe58a 0 7%, transparent 7.8%),
+          radial-gradient(ellipse at 50% 22%, var(--petal) 0 18%, transparent 18.8%),
+          radial-gradient(ellipse at 78% 38%, var(--petal) 0 18%, transparent 18.8%),
+          radial-gradient(ellipse at 67% 74%, var(--petal) 0 18%, transparent 18.8%),
+          radial-gradient(ellipse at 33% 74%, var(--petal) 0 18%, transparent 18.8%),
+          radial-gradient(ellipse at 22% 38%, var(--petal) 0 18%, transparent 18.8%);
+      }
+
+      .flower::after {
+        content: "";
+        position: absolute;
+        left: 49%;
+        top: 63%;
+        width: 8%;
+        height: 70%;
+        border-radius: 999px;
+        background: rgba(8, 127, 91, 0.36);
+        transform: rotate(var(--stem));
+        transform-origin: top;
+      }
+
+      .flower-left-large {
+        --size: 175px;
+        --petal: rgba(255, 95, 151, 0.52);
+        --stem: 16deg;
+        left: -58px;
+        bottom: 128px;
+        transform: rotate(-16deg);
+      }
+
+      .flower-left-small {
+        --size: 115px;
+        --petal: rgba(91, 136, 255, 0.38);
+        --stem: -10deg;
+        left: 22px;
+        bottom: 28px;
+        transform: rotate(14deg);
+      }
+
+      .flower-right-large {
+        --size: 215px;
+        --petal: rgba(255, 111, 173, 0.44);
+        --stem: -18deg;
+        right: -76px;
+        bottom: 80px;
+        transform: rotate(18deg);
+      }
+
+      .flower-right-small {
+        --size: 128px;
+        --petal: rgba(83, 190, 148, 0.34);
+        --stem: 12deg;
+        right: 44px;
+        bottom: -20px;
+        transform: rotate(-8deg);
+      }
+
+      .flower-bottom {
+        --size: 142px;
+        --petal: rgba(158, 111, 255, 0.3);
+        --stem: 0deg;
+        left: 49%;
+        bottom: -74px;
+        transform: translateX(-50%) rotate(5deg);
+      }
+
+      .butterfly {
+        position: absolute;
+        width: var(--size);
+        height: calc(var(--size) * 0.7);
+        opacity: 0.7;
+        transform: rotate(var(--rotate));
+        filter: drop-shadow(0 10px 14px rgba(72, 84, 116, 0.12));
+      }
+
+      .butterfly::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(ellipse at 35% 36%, var(--wing-a) 0 25%, transparent 26%),
+          radial-gradient(ellipse at 65% 36%, var(--wing-a) 0 25%, transparent 26%),
+          radial-gradient(ellipse at 39% 70%, var(--wing-b) 0 17%, transparent 18%),
+          radial-gradient(ellipse at 61% 70%, var(--wing-b) 0 17%, transparent 18%),
+          linear-gradient(90deg, transparent 47%, rgba(78, 58, 91, 0.72) 47% 53%, transparent 53%);
+      }
+
+      .butterfly-one {
+        --size: 64px;
+        --rotate: -18deg;
+        --wing-a: rgba(255, 95, 151, 0.46);
+        --wing-b: rgba(91, 136, 255, 0.33);
+        right: 78px;
+        top: 112px;
+      }
+
+      .butterfly-two {
+        --size: 48px;
+        --rotate: 22deg;
+        --wing-a: rgba(91, 136, 255, 0.36);
+        --wing-b: rgba(255, 95, 151, 0.36);
+        left: 42px;
+        top: 210px;
+      }
+
+      .butterfly-three {
+        --size: 42px;
+        --rotate: -8deg;
+        --wing-a: rgba(83, 190, 148, 0.3);
+        --wing-b: rgba(255, 190, 92, 0.42);
+        right: 28px;
+        top: 360px;
+      }
+
+      .bee {
+        position: absolute;
+        right: 132px;
+        top: 252px;
+        width: 54px;
+        height: 36px;
+        opacity: 0.72;
+        transform: rotate(10deg);
+        filter: drop-shadow(0 10px 14px rgba(72, 84, 116, 0.12));
+      }
+
+      .bee::before {
+        content: "";
+        position: absolute;
+        left: 8px;
+        top: 10px;
+        width: 36px;
+        height: 20px;
+        border-radius: 999px;
+        background:
+          linear-gradient(90deg, #f7c948 0 24%, #2f2933 24% 36%, #f7c948 36% 58%, #2f2933 58% 70%, #f7c948 70% 100%);
+      }
+
+      .bee::after {
+        content: "";
+        position: absolute;
+        left: 12px;
+        top: 1px;
+        width: 24px;
+        height: 14px;
+        border-radius: 999px 999px 45% 45%;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 15px 2px 0 rgba(255, 255, 255, 0.55);
       }
 
       header {
@@ -115,7 +260,8 @@
         border-radius: 8px;
         padding: 16px;
         margin-bottom: 14px;
-        box-shadow: 0 12px 32px rgba(34, 49, 84, 0.1);
+        box-shadow: 0 14px 34px rgba(34, 49, 84, 0.11);
+        backdrop-filter: blur(8px);
       }
 
       h2 {
@@ -251,10 +397,61 @@
         .actions {
           display: grid;
         }
+
+        .flower-left-large {
+          left: -98px;
+          bottom: 150px;
+        }
+
+        .flower-left-small {
+          left: -42px;
+          bottom: 22px;
+        }
+
+        .flower-right-large {
+          right: -126px;
+          bottom: 98px;
+        }
+
+        .flower-right-small {
+          right: -34px;
+          bottom: -28px;
+        }
+
+        .flower-bottom {
+          opacity: 0.42;
+        }
+
+        .butterfly-one {
+          right: 16px;
+          top: 94px;
+        }
+
+        .butterfly-two {
+          left: 10px;
+          top: 180px;
+        }
+
+        .butterfly-three,
+        .bee {
+          display: none;
+        }
       }
     </style>
   </head>
   <body>
+    <div class="decor" aria-hidden="true">
+      <span class="flower flower-left-large"></span>
+      <span class="flower flower-left-small"></span>
+      <span class="flower flower-right-large"></span>
+      <span class="flower flower-right-small"></span>
+      <span class="flower flower-bottom"></span>
+      <span class="butterfly butterfly-one"></span>
+      <span class="butterfly butterfly-two"></span>
+      <span class="butterfly butterfly-three"></span>
+      <span class="bee"></span>
+    </div>
+
     <main>
       <header>
         <div>
