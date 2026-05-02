@@ -93,10 +93,17 @@ def product_configs(config: dict[str, Any]) -> list[dict[str, Any]]:
     shared = {key: config[key] for key in shared_keys if key in config}
     merged = []
     for index, product in enumerate(products, start=1):
-        if not isinstance(product, dict):
+        if isinstance(product, (str, int)):
+            item = {**shared, "product_id": str(product)}
+        elif isinstance(product, dict):
+            item = {**shared, **product}
+        else:
             continue
-        item = {**shared, **product}
-        item.setdefault("name", f"Ürün {index}")
+        item.setdefault("name", f"Ürün {item.get('product_id', index)}")
+        item.setdefault("target_price_min", 0)
+        item.setdefault("target_price_max", 1_000_000)
+        item.setdefault("target_sizes", [])
+        item.setdefault("color_keywords", [])
         merged.append(item)
     return merged
 
@@ -325,10 +332,13 @@ def should_alert(snapshot: ProductSnapshot, config: dict[str, Any]) -> tuple[boo
     max_price = float(config["target_price_max"])
     if not (min_price <= snapshot.price <= max_price):
         return False, f"Fiyat aralık dışında: {snapshot.price:g} {snapshot.currency}."
-    if not snapshot.matching_sizes:
-        return False, "M/L beden bilgisi stokta görünmüyor."
-    if not snapshot.stock_known:
+    target_sizes = list(config.get("target_sizes", []))
+    if target_sizes and not snapshot.matching_sizes:
+        return False, f"{'/'.join(target_sizes)} beden bilgisi stokta görünmüyor."
+    if target_sizes and not snapshot.stock_known:
         return True, "Fiyat uygun; beden görüldü ama stok bayrağı net değil."
+    if not target_sizes:
+        return True, "Fiyat uygun ve ürün stokta görünüyor."
     return True, "Fiyat uygun ve hedef beden stokta görünüyor."
 
 
@@ -359,6 +369,18 @@ def product_key(config: dict[str, Any]) -> str:
     return str(config.get("product_id") or config.get("product_url") or config.get("name") or "default")
 
 
+def product_link(config: dict[str, Any], snapshot: ProductSnapshot | None = None) -> str:
+    product_url = str(config.get("product_url", "")).strip()
+    if product_url:
+        return product_url
+    if snapshot and snapshot.source and "/api/" not in snapshot.source:
+        return snapshot.source
+    product_id = str(config.get("product_id", "")).strip()
+    if product_id:
+        return f"https://www.trendyol.com/sr?q={quote(product_id)}"
+    return "https://www.trendyol.com"
+
+
 def run_product_once(
     product_config: dict[str, Any],
     app_config: dict[str, Any],
@@ -384,14 +406,16 @@ def run_product_once(
     print(f"Durum: {reason}")
 
     if should_send and (force_notify or not already_sent):
+        link = product_link(product_config, snapshot)
+        size_text = ", ".join(snapshot.matching_sizes) or "beden filtresi yok"
         message = (
             f"{snapshot.title}\n"
             f"Fiyat: {snapshot.price:g} {snapshot.currency}\n"
-            f"Beden: {', '.join(snapshot.matching_sizes)}\n"
+            f"Beden: {size_text}\n"
             f"{reason}\n"
-            f"{product_config['product_url']}"
+            f"{link}"
         )
-        send_ntfy(str(product_config["ntfy_topic"]), "Elbise alarmi", message, str(product_config["product_url"]))
+        send_ntfy(str(product_config["ntfy_topic"]), "Elbise alarmi", message, link)
         product_state["last_alert_signature"] = current_signature
         product_state["last_alert_at"] = int(time.time())
         print("Bildirim gönderildi.")
@@ -431,7 +455,7 @@ def main() -> None:
             str(config["ntfy_topic"]),
             "Elbise alarmi test",
             "Bildirim kurulumu çalışıyor.",
-            str(config["product_url"]),
+            str(config.get("product_url") or "https://www.trendyol.com"),
         )
         print("Test bildirimi gönderildi.")
         return
