@@ -1,0 +1,25 @@
+{
+  "check_interval_seconds": 600,
+  "ntfy_topic": "elbise-alarmi-kendine-ozel-bir-konu-yaz",
+  "state_file": "data/state.json",
+  "products": [
+    {
+      "name": "Lacivert elbise",
+      "product_url": "https://tyml.gl/uq4mog25i63ut",
+      "product_id": "660272836",
+      "target_price_min": 800,
+      "target_price_max": 1250,
+      "target_sizes": ["M", "L"],
+      "color_keywords": ["mavi", "lacivert"]
+    },
+    {
+      "name": "İkinci ürün",
+      "product_url": "https://ornek-urun-linki",
+      "product_id": "ornek-urun-id",
+      "target_price_min": 500,
+      "target_price_max": 900,
+      "target_sizes": ["M"],
+      "color_keywords": ["siyah"]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "check_interval_seconds": 600,
+  "ntfy_topic": "abdul-elbise-660272836-20260502",
+  "state_file": "data/state.json",
+  "products": [
+    {
+      "name": "Lacivert Zeynep Tosun elbise",
+      "product_url": "https://tyml.gl/uq4mog25i63ut",
+      "product_id": "660272836",
+      "target_price_min": 800,
+      "target_price_max": 1250,
+      "target_sizes": ["M", "L"],
+      "color_keywords": ["mavi", "lacivert"]
+    }
+  ]
+}
