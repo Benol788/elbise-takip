@@ -318,7 +318,7 @@
 
       form {
         display: grid;
-        grid-template-columns: minmax(220px, 1.5fr) minmax(100px, 0.45fr) minmax(100px, 0.45fr) minmax(120px, 0.5fr);
+        grid-template-columns: minmax(220px, 1.4fr) minmax(100px, 0.4fr) minmax(100px, 0.4fr) minmax(110px, 0.45fr) minmax(120px, 0.5fr);
         gap: 10px;
       }
 
@@ -686,6 +686,10 @@
             Beden
             <input id="sizes" autocomplete="off" placeholder="M,L veya 34,36" />
           </label>
+          <label>
+            Renk
+            <input id="colors" autocomplete="off" placeholder="mavi,lacivert" />
+          </label>
           <div class="actions">
             <button id="submit-button" type="submit">Ürün Ekle</button>
             <button class="secondary" id="refresh" type="button">Yenile</button>
@@ -751,6 +755,13 @@
           .map((size) => size.trim())
           .filter(Boolean);
       }
+      
+      function colorsFrom(value) {
+        return value
+          .split(",")
+          .map((color) => color.trim().toLowerCase())
+          .filter(Boolean);
+     }
 
       function exitEditMode() {
         editingIdEl.value = "";
@@ -785,6 +796,9 @@
             const sizes = Array.isArray(row.target_sizes) && row.target_sizes.length
               ? `Beden: ${row.target_sizes.join(", ")}`
               : "Beden: fark etmez";
+            const colors = Array.isArray(row.color_keywords) && row.color_keywords.length
+              ? `Renk: ${row.color_keywords.join(", ")}`
+              : "Renk: fark etmez";
             const lastPrice = row.last_price
               ? `Son fiyat: ${Number(row.last_price)} ${row.last_currency || "TL"}`
               : "Son fiyat: henüz yok";
@@ -804,6 +818,7 @@
                   <div class="title">${rowTitle(row)}</div>
                   <div class="meta">${price}</div>
                   <div class="meta">${sizes}</div>
+                  <div class="meta">${colors}</div>
                   <div class="meta">${lastPrice}</div>
                   <div class="meta">${lastStock}</div>
                   <div class="meta">${lastChecked}</div>
@@ -847,6 +862,7 @@
         const minPrice = Number(document.querySelector("#min-price").value.replace(",", "."));
         const maxPrice = Number(document.querySelector("#max-price").value.replace(",", "."));
         const sizes = sizesFrom(document.querySelector("#sizes").value);
+        const colors = colorsFrom(document.querySelector("#colors").value);
         const editingId = editingIdEl.value;
 
         if (!productValue || !Number.isFinite(minPrice) || !Number.isFinite(maxPrice)) {
@@ -860,7 +876,8 @@
           product_id: productIdFrom(productValue),
           target_price_min: minPrice,
           target_price_max: maxPrice,
-          target_sizes: sizes
+          target_sizes: sizes,
+          color_keywords: colors
         };
 
         const response = await fetch(
@@ -890,6 +907,7 @@
       document.querySelector("#min-price").value = row.target_price_min ?? "";
       document.querySelector("#max-price").value = row.target_price_max ?? "";
       document.querySelector("#sizes").value = Array.isArray(row.target_sizes) ? row.target_sizes.join(",") : "";
+      document.querySelector("#colors").value = Array.isArray(row.color_keywords) ? row.color_keywords.join(",") : "";
       submitButtonEl.textContent = "Kaydet";
       cancelEditEl.hidden = false;
       window.scrollTo({ top: 0, behavior: "smooth" });
