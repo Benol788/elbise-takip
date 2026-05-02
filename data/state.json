@@ -1,5 +1,9 @@
 {
   "products": {
-    "660272836": {}
+    "660272836": {},
+    "1072453822": {
+      "last_alert_signature": "450.00||False|True",
+      "last_alert_at": 1777733081
+    }
   }
 }
