@@ -24,6 +24,8 @@ jobs:
       - name: Urunleri kontrol et
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: python src/dress_watch.py --config config.json --once
 
       - name: Bildirim durumunu kaydet
