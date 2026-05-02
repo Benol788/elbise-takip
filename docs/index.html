@@ -717,7 +717,18 @@
       function rowTitle(row) {
         return row.name || row.product_id || row.product_url || "Ürün";
       }
-
+      function checkedAtText(value) {
+        if (!value) return "Son kontrol: henüz yok";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "Son kontrol: bilinmiyor";
+        return `Son kontrol: ${date.toLocaleString("tr-TR", {
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        })}`;
+      }
+      
       function renderProducts(rows) {
         if (!rows.length) {
           listEl.innerHTML = '<div class="empty">Henüz ürün yok.</div>';
@@ -730,6 +741,15 @@
             const sizes = Array.isArray(row.target_sizes) && row.target_sizes.length
               ? `Beden: ${row.target_sizes.join(", ")}`
               : "Beden: fark etmez";
+            const lastPrice = row.last_price
+              ? `Son fiyat: ${Number(row.last_price)} ${row.last_currency || "TL"}`
+              : "Son fiyat: henüz yok";
+              const lastStock = row.last_stock_status
+              ? `Stok: ${row.last_stock_status}`
+              : "Stok: henüz yok";
+            const lastStatus = row.last_status ? `Durum: ${row.last_status}` : "";
+            const lastChecked = checkedAtText(row.last_checked_at);
+
             const ref = row.product_url || row.product_id || row.id;
             return `
               <article class="product">
@@ -737,6 +757,10 @@
                   <div class="title">${rowTitle(row)}</div>
                   <div class="meta">${price}</div>
                   <div class="meta">${sizes}</div>
+                  <div class="meta">${lastPrice}</div>
+                  <div class="meta">${lastStock}</div>
+                  <div class="meta">${lastChecked}</div>
+                  ${lastStatus ? `<div class="meta">${lastStatus}</div>` : ""}
                   <div class="meta">${ref}</div>
                 </div>
                 <button class="danger" data-id="${row.id}" type="button">Sil</button>
