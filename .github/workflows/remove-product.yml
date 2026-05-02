@@ -1,0 +1,40 @@
+name: Urun Sil
+
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        description: "Silinecek urun linki veya urun kodu"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Urunu config dosyasindan sil
+        run: python src/remove_product.py --config config.json --product "${{ inputs.product }}"
+
+      - name: Degisikligi kaydet
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config.json
+          if git diff --cached --quiet; then
+            echo "Silinecek eslesen urun bulunamadi."
+          else
+            git commit -m "Remove product ${{ inputs.product }}"
+            git pull --rebase
+            git push
+          fi
