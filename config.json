@@ -9,8 +9,15 @@
       "product_id": "660272836",
       "target_price_min": 800,
       "target_price_max": 1250,
-      "target_sizes": ["M", "L"],
-      "color_keywords": ["mavi", "lacivert"]
-    }
+      "target_sizes": [
+        "M",
+        "L"
+      ],
+      "color_keywords": [
+        "mavi",
+        "lacivert"
+      ]
+    },
+    "1072453822"
   ]
 }
