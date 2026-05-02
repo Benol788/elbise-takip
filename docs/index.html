@@ -621,6 +621,21 @@
      .product-link:hover {
        background: rgba(31, 99, 233, 0.15);
     }
+    .product-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .product-actions button {
+      min-width: 88px;
+    }
+
+    @media (max-width: 760px) {
+      .product-actions {
+        grid-column: 1 / -1;
+      }
+    }
+
     </style>
   </head>
   <body>
@@ -650,6 +665,7 @@
       <section>
         <h2>Ürün Ekle</h2>
         <form id="add-form">
+          <input id="editing-id" type="hidden" />  
           <label>
             Ürün adı
             <input id="name" autocomplete="off" placeholder="Mavi elbise" />
@@ -671,8 +687,9 @@
             <input id="sizes" autocomplete="off" placeholder="M,L veya 34,36" />
           </label>
           <div class="actions">
-            <button type="submit">Ürün Ekle</button>
+            <button id="submit-button" type="submit">Ürün Ekle</button>
             <button class="secondary" id="refresh" type="button">Yenile</button>
+            <button class="secondary" id="cancel-edit" type="button" hidden>Vazgeç</button>
           </div>
         </form>
       </section>
@@ -692,6 +709,10 @@
       const listEl = document.querySelector("#products");
       const formEl = document.querySelector("#add-form");
       const refreshEl = document.querySelector("#refresh");
+      const editingIdEl = document.querySelector("#editing-id");
+      const submitButtonEl = document.querySelector("#submit-button");
+      const cancelEditEl = document.querySelector("#cancel-edit");
+      let currentRows = [];
 
       function apiUrl(path = "") {
         return `${config.supabaseUrl.replace(/\/$/, "")}/rest/v1/products${path}`;
@@ -731,6 +752,12 @@
           .filter(Boolean);
       }
 
+      function exitEditMode() {
+        editingIdEl.value = "";
+        submitButtonEl.textContent = "Ürün Ekle";
+        cancelEditEl.hidden = true;
+        formEl.reset();
+      }
       function rowTitle(row) {
         return row.name || row.product_id || row.product_url || "Ürün";
       }
@@ -783,7 +810,10 @@
                   ${lastStatus ? `<div class="meta">${lastStatus}</div>` : ""}
                   <div class="meta">${linkHtml}</div>
                 </div>
-                <button class="danger" data-id="${row.id}" type="button">Sil</button>
+                <div class="product-actions">
+                  <button class="secondary" data-edit-id="${row.id}" type="button">Düzenle</button>
+                  <button class="danger" data-id="${row.id}" type="button">Sil</button>
+                </div>
               </article>
             `;
           })
@@ -804,6 +834,7 @@
         });
         if (!response.ok) throw new Error("Liste alınamadı.");
         const rows = await response.json();
+        currentRows = rows;
         renderProducts(rows);
         statusEl.textContent = `${rows.length} ürün`;
       }
@@ -816,6 +847,7 @@
         const minPrice = Number(document.querySelector("#min-price").value.replace(",", "."));
         const maxPrice = Number(document.querySelector("#max-price").value.replace(",", "."));
         const sizes = sizesFrom(document.querySelector("#sizes").value);
+        const editingId = editingIdEl.value;
 
         if (!productValue || !Number.isFinite(minPrice) || !Number.isFinite(maxPrice)) {
           showMessage("Ürün ve fiyat aralığını doldur.", "err");
@@ -831,18 +863,37 @@
           target_sizes: sizes
         };
 
-        const response = await fetch(apiUrl(), {
-          method: "POST",
+        const response = await fetch(
+         editingId ? apiUrl(`?id=eq.${encodeURIComponent(editingId)}`) : apiUrl(),
+         {
+          method: editingId ? "PATCH" : "POST",
           headers: headers({ Prefer: "return=minimal" }),
           body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error("Ürün eklenemedi.");
+        }
+      );
+      if (!response.ok) throw new Error(editingId ? "Ürün güncellenemedi." : "Ürün eklenemedi.");
 
-        formEl.reset();
-        showMessage("Ürün takip listesine eklendi.");
-        await loadProducts();
+      showMessage(editingId ? "Ürün güncellendi." : "Ürün takip listesine eklendi.");
+      exitEditMode();
+      await loadProducts();
+      }
+    function editProduct(id) {
+      const row = currentRows.find((item) => item.id === id);
+      if (!row) {
+        showMessage("Düzenlenecek ürün bulunamadı.", "err");
+        return;
       }
 
+      editingIdEl.value = row.id;
+      document.querySelector("#name").value = row.name || "";
+      document.querySelector("#product").value = row.product_url || row.product_id || "";
+      document.querySelector("#min-price").value = row.target_price_min ?? "";
+      document.querySelector("#max-price").value = row.target_price_max ?? "";
+      document.querySelector("#sizes").value = Array.isArray(row.target_sizes) ? row.target_sizes.join(",") : "";
+      submitButtonEl.textContent = "Kaydet";
+      cancelEditEl.hidden = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
       async function removeProduct(id) {
         clearMessage();
         const response = await fetch(apiUrl(`?id=eq.${encodeURIComponent(id)}`), {
@@ -861,8 +912,19 @@
       refreshEl.addEventListener("click", () => {
         loadProducts().catch((error) => showMessage(error.message, "err"));
       });
+      
+        cancelEditEl.addEventListener("click", () => {
+          exitEditMode();
+          clearMessage();
+        });
 
       listEl.addEventListener("click", (event) => {
+        const editButton = event.target.closest("button[data-edit-id]");
+        if (editButton) {
+          editProduct(editButton.dataset.editId);
+          return;
+        }
+        
         const button = event.target.closest("button[data-id]");
         if (!button) return;
         removeProduct(button.dataset.id).catch((error) => showMessage(error.message, "err"));
