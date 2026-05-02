@@ -46,6 +46,31 @@
         mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 72%);
       }
 
+      body::after {
+        content: "";
+        position: fixed;
+        inset: auto -80px -90px auto;
+        width: min(420px, 78vw);
+        aspect-ratio: 1;
+        pointer-events: none;
+        opacity: 0.55;
+        background:
+          radial-gradient(circle at 45% 42%, rgba(255, 255, 255, 0.95) 0 3%, transparent 3.4%),
+          radial-gradient(ellipse at 45% 31%, rgba(255, 80, 139, 0.48) 0 8%, transparent 8.6%),
+          radial-gradient(ellipse at 56% 39%, rgba(255, 80, 139, 0.42) 0 8%, transparent 8.6%),
+          radial-gradient(ellipse at 52% 53%, rgba(255, 80, 139, 0.45) 0 8%, transparent 8.6%),
+          radial-gradient(ellipse at 36% 52%, rgba(255, 80, 139, 0.38) 0 8%, transparent 8.6%),
+          radial-gradient(ellipse at 33% 38%, rgba(255, 80, 139, 0.44) 0 8%, transparent 8.6%),
+          radial-gradient(circle at 72% 62%, rgba(255, 255, 255, 0.9) 0 2.4%, transparent 2.8%),
+          radial-gradient(ellipse at 72% 53%, rgba(31, 99, 233, 0.35) 0 6.5%, transparent 7%),
+          radial-gradient(ellipse at 80% 62%, rgba(31, 99, 233, 0.32) 0 6.5%, transparent 7%),
+          radial-gradient(ellipse at 72% 71%, rgba(31, 99, 233, 0.33) 0 6.5%, transparent 7%),
+          radial-gradient(ellipse at 64% 62%, rgba(31, 99, 233, 0.3) 0 6.5%, transparent 7%),
+          radial-gradient(ellipse at 52% 74%, rgba(8, 127, 91, 0.22) 0 10%, transparent 10.8%),
+          radial-gradient(ellipse at 82% 82%, rgba(8, 127, 91, 0.18) 0 12%, transparent 12.8%);
+        filter: blur(0.2px);
+      }
+
       main {
         position: relative;
         z-index: 1;
