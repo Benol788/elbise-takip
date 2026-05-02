@@ -20,19 +20,38 @@
       * {
         box-sizing: border-box;
       }
+        body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(31, 99, 233, 0.18), transparent 24rem),
+    radial-gradient(circle at 88% 8%, rgba(255, 122, 162, 0.18), transparent 22rem),
+    radial-gradient(circle at 50% 100%, rgba(8, 127, 91, 0.12), transparent 28rem),
+    linear-gradient(180deg, #ffffff 0, var(--bg) 22rem);
+  color: var(--text);
+  min-height: 100vh;
+  position: relative;
+}
 
-      body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: var(--bg);
-        color: var(--text);
-      }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(17, 24, 39, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 72%);
+}
 
-      main {
-        width: min(960px, calc(100% - 28px));
-        margin: 0 auto;
-        padding: 24px 0 36px;
-      }
+main {
+  position: relative;
+  z-index: 1;
+  width: min(960px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 24px 0 36px;
+}
 
       header {
         display: flex;
