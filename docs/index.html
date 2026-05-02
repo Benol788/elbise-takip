@@ -185,8 +185,9 @@
         padding: 0 15px;
         background: var(--blue);
         color: white;
-        font-size: 15px;
-        font-weight: 900;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0;
         cursor: pointer;
         box-shadow: 0 12px 24px rgba(79, 124, 255, 0.24);
       }
@@ -283,7 +284,13 @@
         gap: 8px;
         margin-bottom: 6px;
         font-size: 17px;
-        font-weight: 900;
+        font-weight: 800;
+      }
+      .star {
+        color: #f5a300;
+        font-size: 18px;
+        line-height: 1;
+        text-shadow: 0 1px 4px rgba(245, 163, 0, 0.28);
       }
 
       .badge {
@@ -811,7 +818,7 @@
               <article class="${classes}">
                 <div class="product-body">
                   <div class="title">
-                    ${row.is_favorite ? "★" : ""}
+                    ${row.is_favorite ? '<span class="star">★</span>' : ""}
                     ${rowTitle(row)}
                     ${hit ? '<span class="badge">Uygun</span>' : ""}
                     ${row.is_paused ? '<span class="badge paused-badge">Duraklatıldı</span>' : ""}
