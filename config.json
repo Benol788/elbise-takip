@@ -11,12 +11,5 @@
       "target_price_max": 1250,
       "target_sizes": ["M", "L"],
       "color_keywords": ["mavi", "lacivert"]
-    },
-    {
-      "product_url": "https://www.trendyol.com/mamaya/3-lu-dogal-kirmizi-pancar-suyu-250-ml-cam-sise-p-1072453822",
-      "product_id": "1072453822",
-      "target_price_min": 400,
-      "target_price_max": 500
     }
   ]
-}
