@@ -112,6 +112,7 @@ def supabase_products() -> list[dict[str, Any]]:
             "target_price_max": float(row.get("target_price_max") or 1_000_000),
             "target_sizes": row.get("target_sizes") or [],
             "color_keywords": row.get("color_keywords") or [],
+            "alert_mode": row.get("alert_mode") or "price_stock",
         }
         products.append(product)
     return products
@@ -152,6 +153,7 @@ def product_configs(config: dict[str, Any]) -> list[dict[str, Any]]:
         "target_price_max",
         "target_sizes",
         "color_keywords",
+        "alert_mode",
         "ntfy_topic",
         "state_file",
     }
@@ -169,6 +171,7 @@ def product_configs(config: dict[str, Any]) -> list[dict[str, Any]]:
         item.setdefault("target_price_max", 1_000_000)
         item.setdefault("target_sizes", [])
         item.setdefault("color_keywords", [])
+        item.setdefault("alert_mode", "price_stock")
         merged.append(item)
     return merged
 
@@ -389,23 +392,58 @@ def fetch_snapshot(config: dict[str, Any]) -> ProductSnapshot:
 
 
 def should_alert(snapshot: ProductSnapshot, config: dict[str, Any]) -> tuple[bool, str]:
+    alert_mode = str(config.get("alert_mode") or "price_stock")
+    min_price = float(config["target_price_min"])
+    max_price = float(config["target_price_max"])
+    target_sizes = list(config.get("target_sizes", []))
+
+    price_ok = snapshot.price is not None and min_price <= snapshot.price <= max_price
+
+    def size_status() -> tuple[bool, str | None]:
+        if not target_sizes:
+            return True, None
+        if not snapshot.matching_sizes:
+            return False, f"{'/'.join(target_sizes)} beden bilgisi stokta görünmüyor."
+        if not snapshot.stock_known:
+            return True, "Hedef beden görüldü ama stok bayrağı net değil."
+        return True, None
+
+    if alert_mode == "price":
+        if snapshot.price is None:
+            return False, "Fiyat okunamadı."
+        if not price_ok:
+            return False, f"Fiyat aralık dışında: {snapshot.price:g} {snapshot.currency}."
+        return True, "Fiyat hedef aralıkta görünüyor."
+
+    if alert_mode == "stock":
+        size_ok, size_reason = size_status()
+        if not size_ok:
+            return False, size_reason or "Hedef beden stokta görünmüyor."
+        if target_sizes:
+            if size_reason:
+                return True, size_reason
+            return True, "Hedef beden stokta görünüyor."
+        if snapshot.overall_stock is True:
+            return True, "Ürün stokta görünüyor."
+        if snapshot.overall_stock is False:
+            return False, "Ürün stokta değil."
+        return False, "Stok durumu net okunamadı."
+
     if snapshot.price is None:
         return False, "Fiyat okunamadı."
     if snapshot.overall_stock is False:
         return False, "Fiyat uygun olabilir, ancak ürün genel durumu stokta değil."
-    min_price = float(config["target_price_min"])
-    max_price = float(config["target_price_max"])
-    if not (min_price <= snapshot.price <= max_price):
+    if not price_ok:
         return False, f"Fiyat aralık dışında: {snapshot.price:g} {snapshot.currency}."
-    target_sizes = list(config.get("target_sizes", []))
-    if target_sizes and not snapshot.matching_sizes:
-        return False, f"{'/'.join(target_sizes)} beden bilgisi stokta görünmüyor."
-    if target_sizes and not snapshot.stock_known:
-        return True, "Fiyat uygun; beden görüldü ama stok bayrağı net değil."
+
+    size_ok, size_reason = size_status()
+    if not size_ok:
+        return False, size_reason or "Hedef beden stokta görünmüyor."
+    if size_reason:
+        return True, f"Fiyat uygun; {size_reason}"
     if not target_sizes:
         return True, "Fiyat uygun ve ürün stokta görünüyor."
     return True, "Fiyat uygun ve hedef beden stokta görünüyor."
-
 
 def send_ntfy(topic: str, title: str, message: str, click_url: str) -> None:
     url = f"https://ntfy.sh/{quote(topic)}"
@@ -457,7 +495,7 @@ def run_product_once(
     name = str(product_config.get("name") or snapshot.title)
     should_send, reason = should_alert(snapshot, product_config)
 
-    current_signature = signature(snapshot)
+    current_signature = f"{signature(snapshot)}|{product_config.get('alert_mode', 'price_stock')}"
     key = product_key(product_config)
     product_state = state.setdefault("products", {}).setdefault(key, {})
     already_sent = product_state.get("last_alert_signature") == current_signature
