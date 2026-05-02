@@ -634,6 +634,10 @@
         <h2>Ürün Ekle</h2>
         <form id="add-form">
           <label>
+            Ürün adı
+            <input id="name" autocomplete="off" placeholder="Mavi elbise" />
+          </label>
+          <label>
             Ürün linki veya kodu
             <input id="product" autocomplete="off" placeholder="https://... veya 1072453822" required />
           </label>
@@ -763,6 +767,7 @@
       async function addProduct(event) {
         event.preventDefault();
         clearMessage();
+        const name = document.querySelector("#name").value.trim();
         const productValue = document.querySelector("#product").value.trim();
         const minPrice = Number(document.querySelector("#min-price").value.replace(",", "."));
         const maxPrice = Number(document.querySelector("#max-price").value.replace(",", "."));
@@ -774,6 +779,7 @@
         }
 
         const payload = {
+           name: name,
           product_url: /^https?:\/\//i.test(productValue) ? productValue : "",
           product_id: productIdFrom(productValue),
           target_price_min: minPrice,
