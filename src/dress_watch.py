@@ -6,6 +6,7 @@ import os
 import re
 import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -59,6 +60,35 @@ def request_json(url: str, headers: dict[str, str], timeout: int = 25) -> Any:
         return json.loads(response.read().decode("utf-8"))
 
 
+def supabase_headers(extra: dict[str, str] | None = None) -> dict[str, str]:
+    supabase_key = os.environ.get("SUPABASE_ANON_KEY", "")
+    headers = {
+        "apikey": supabase_key,
+        "Authorization": f"Bearer {supabase_key}",
+        "Content-Type": "application/json",
+    }
+    if extra:
+        headers.update(extra)
+    return headers
+
+
+def supabase_update_product(config: dict[str, Any], payload: dict[str, Any]) -> None:
+    supabase_url = os.environ.get("SUPABASE_URL", "").rstrip("/")
+    supabase_key = os.environ.get("SUPABASE_ANON_KEY", "")
+    row_id = str(config.get("_supabase_id", "")).strip()
+    if not supabase_url or not supabase_key or not row_id:
+        return
+
+    query = urlencode({"id": f"eq.{row_id}"})
+    request = Request(
+        f"{supabase_url}/rest/v1/products?{query}",
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers=supabase_headers({"Prefer": "return=minimal"}),
+        method="PATCH",
+    )
+    with urlopen(request, timeout=25) as response:
+        response.read()
+        
 def supabase_products() -> list[dict[str, Any]]:
     supabase_url = os.environ.get("SUPABASE_URL", "").rstrip("/")
     supabase_key = os.environ.get("SUPABASE_ANON_KEY", "")
@@ -68,14 +98,13 @@ def supabase_products() -> list[dict[str, Any]]:
     query = urlencode({"select": "*", "order": "created_at.asc"})
     rows = request_json(
         f"{supabase_url}/rest/v1/products?{query}",
-        {
-            "apikey": supabase_key,
-            "Authorization": f"Bearer {supabase_key}",
-        },
-    )
+        supabase_headers(),
+   )
+
     products = []
     for row in rows:
         product: dict[str, Any] = {
+            "_supabase_id": row.get("id") or "",
             "name": row.get("name") or f"Ürün {row.get('product_id') or row.get('id')}",
             "product_url": row.get("product_url") or "",
             "product_id": row.get("product_id") or "",
@@ -440,6 +469,24 @@ def run_product_once(
     print(f"Genel stok: {snapshot.overall_stock if snapshot.overall_stock is not None else 'bilinmiyor'}")
     print(f"Kaynak: {snapshot.source}")
     print(f"Durum: {reason}")
+    supabase_update_product(
+        product_config,
+        {
+            "last_checked_at": datetime.now(timezone.utc).isoformat(),
+            "last_price": snapshot.price,
+            "last_currency": snapshot.currency,
+            "last_stock_status": (
+                "var"
+                if snapshot.overall_stock is True
+                else "yok"
+                if snapshot.overall_stock is False
+                else "bilinmiyor"
+            ),
+            "last_matching_sizes": snapshot.matching_sizes,
+            "last_status": reason,
+            "last_source": snapshot.source,
+        },
+    )
 
     if should_send and (force_notify or not already_sent):
         link = product_link(product_config, snapshot)
@@ -474,6 +521,15 @@ def run_once(config: dict[str, Any], config_path: Path, force_notify: bool = Fal
             name = product_config.get("name") or product_config.get("product_id") or product_config.get("product_url")
             print(f"Ürün kontrol edilemedi: {name}")
             print(f"Hata: {exc}")
+            supabase_update_product(
+                product_config,
+                {
+                    "last_checked_at": datetime.now(timezone.utc).isoformat(),
+                    "last_status": f"Hata: {exc}",
+                    "last_stock_status": "bilinmiyor",
+                },
+            )
+
     save_json(state_path, state)
     return snapshots
 
