@@ -553,7 +553,7 @@ def run_once(config: dict[str, Any], config_path: Path, force_notify: bool = Fal
     state_path = (config_path.parent / config.get("state_file", "data/state.json")).resolve()
     state = load_json(state_path) if state_path.exists() else {}
     snapshots = []
-     for index, product_config in enumerate(product_configs(config), start=1):
+    for index, product_config in enumerate(product_configs(config), start=1):
         if index > 1:
             print("")
 
