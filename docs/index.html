@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Elbise Stok Takip</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f9;
+        --text: #15171a;
+        --muted: #606771;
+        --panel: #ffffff;
+        --border: #d9dee7;
+        --green: #0f7b4f;
+        --blue: #175ddc;
+        --red: #b42318;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      main {
+        width: min(920px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0;
+      }
+
+      header {
+        margin-bottom: 22px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+        line-height: 1.15;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      a.card {
+        display: flex;
+        min-height: 170px;
+        padding: 18px;
+        flex-direction: column;
+        justify-content: space-between;
+        text-decoration: none;
+        color: inherit;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      .icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #fff;
+        font-weight: 700;
+        font-size: 22px;
+      }
+
+      .green {
+        background: var(--green);
+      }
+
+      .blue {
+        background: var(--blue);
+      }
+
+      .red {
+        background: var(--red);
+      }
+
+      h2 {
+        margin: 18px 0 8px;
+        font-size: 20px;
+      }
+
+      .note {
+        margin-top: 18px;
+        padding: 14px 16px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      .note strong {
+        color: var(--text);
+      }
+
+      @media (max-width: 760px) {
+        main {
+          width: min(100% - 24px, 920px);
+          padding-top: 20px;
+        }
+
+        h1 {
+          font-size: 28px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        a.card {
+          min-height: 136px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Elbise Stok Takip</h1>
+        <p>Ürün ekleme, ürün silme ve takip durumunu tek yerden aç.</p>
+      </header>
+
+      <section class="grid" aria-label="Kontroller">
+        <a class="card" href="https://github.com/Benol788/elbise-takip/actions/workflows/dress-watch.yml">
+          <div class="icon green">✓</div>
+          <div>
+            <h2>Takip Durumu</h2>
+            <p>Son kontrolleri, fiyatları, stok durumunu ve hataları gör.</p>
+          </div>
+        </a>
+
+        <a class="card" href="https://github.com/Benol788/elbise-takip/actions/workflows/add-product.yml">
+          <div class="icon blue">+</div>
+          <div>
+            <h2>Ürün Ekle</h2>
+            <p>Ürün linki veya kodu gir, fiyat aralığıyla takibe al.</p>
+          </div>
+        </a>
+
+        <a class="card" href="https://github.com/Benol788/elbise-takip/actions/workflows/remove-product.yml">
+          <div class="icon red">−</div>
+          <div>
+            <h2>Ürün Sil</h2>
+            <p>İşin biten ürünü link veya ürün koduyla listeden kaldır.</p>
+          </div>
+        </a>
+      </section>
+
+      <section class="note">
+        <p><strong>Not:</strong> Butonlar GitHub Actions ekranını açar. İşlem yapmak için GitHub hesabına giriş yapmış olman gerekir.</p>
+      </section>
+    </main>
+  </body>
+</html>
