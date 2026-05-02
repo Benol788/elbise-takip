@@ -7,51 +7,52 @@
     <script src="./app-config.js"></script>
     <style>
       :root {
-        --bg: #f6f7f9;
-        --text: #15171a;
-        --muted: #606771;
+        --bg: #f4f6fb;
+        --text: #111827;
+        --muted: #687385;
         --panel: #fff;
-        --border: #d9dee7;
-        --blue: #175ddc;
-        --red: #b42318;
-        --green: #0f7b4f;
+        --border: #d9e1ee;
+        --blue: #1f63e9;
+        --red: #c92a2a;
+        --green: #087f5b;
       }
 
       * {
         box-sizing: border-box;
       }
-        body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background:
-    radial-gradient(circle at 12% 10%, rgba(31, 99, 233, 0.18), transparent 24rem),
-    radial-gradient(circle at 88% 8%, rgba(255, 122, 162, 0.18), transparent 22rem),
-    radial-gradient(circle at 50% 100%, rgba(8, 127, 91, 0.12), transparent 28rem),
-    linear-gradient(180deg, #ffffff 0, var(--bg) 22rem);
-  color: var(--text);
-  min-height: 100vh;
-  position: relative;
-}
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(17, 24, 39, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 24, 39, 0.035) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 72%);
-}
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background:
+          radial-gradient(circle at 10% 8%, rgba(31, 99, 233, 0.34), transparent 25rem),
+          radial-gradient(circle at 88% 10%, rgba(255, 80, 139, 0.32), transparent 23rem),
+          radial-gradient(circle at 50% 100%, rgba(8, 127, 91, 0.2), transparent 30rem),
+          linear-gradient(180deg, #fff7fb 0, #edf4ff 18rem, var(--bg) 100%);
+        color: var(--text);
+        min-height: 100vh;
+        position: relative;
+      }
 
-main {
-  position: relative;
-  z-index: 1;
-  width: min(960px, calc(100% - 28px));
-  margin: 0 auto;
-  padding: 24px 0 36px;
-}
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(31, 99, 233, 0.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 80, 139, 0.06) 1px, transparent 1px);
+        background-size: 34px 34px;
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 72%);
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+        width: min(960px, calc(100% - 28px));
+        margin: 0 auto;
+        padding: 24px 0 36px;
+      }
 
       header {
         display: flex;
@@ -89,6 +90,7 @@ main {
         border-radius: 8px;
         padding: 16px;
         margin-bottom: 14px;
+        box-shadow: 0 12px 32px rgba(34, 49, 84, 0.1);
       }
 
       h2 {
