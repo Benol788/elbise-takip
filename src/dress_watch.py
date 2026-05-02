@@ -432,7 +432,12 @@ def run_once(config: dict[str, Any], config_path: Path, force_notify: bool = Fal
     for index, product_config in enumerate(product_configs(config), start=1):
         if index > 1:
             print("")
-        snapshots.append(run_product_once(product_config, config, config_path, state, force_notify))
+        try:
+            snapshots.append(run_product_once(product_config, config, config_path, state, force_notify))
+        except Exception as exc:
+            name = product_config.get("name") or product_config.get("product_id") or product_config.get("product_url")
+            print(f"Ürün kontrol edilemedi: {name}")
+            print(f"Hata: {exc}")
     save_json(state_path, state)
     return snapshots
 
