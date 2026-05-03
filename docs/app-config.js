@@ -6,12 +6,26 @@ window.APP_CONFIG = {
 (() => {
   const OWNERS = ["Kerim", "Selin"];
   const DEFAULT_OWNER = "Kerim";
+
   const NTFY_TOPICS = {
     Kerim: "abdul-elbise-660272836-20260502",
     Selin: "selin-elbise-20260503-9c7f2a"
   };
 
+  const CATEGORIES = {
+    "Diğer": "other",
+    "Elbise": "dress",
+    "Kitap": "book",
+    "Elektronik": "tech",
+    "Kozmetik": "beauty"
+  };
+
   const originalFetch = window.fetch.bind(window);
+  let visibleRows = [];
+
+  function isProductsApi(url) {
+    return String(url || "").includes(".supabase.co") && String(url || "").includes("/products");
+  }
 
   function currentOwner() {
     const saved = localStorage.getItem("activeOwner");
@@ -20,21 +34,6 @@ window.APP_CONFIG = {
 
   function otherOwner() {
     return currentOwner() === "Kerim" ? "Selin" : "Kerim";
-  }
-
-  function setCurrentOwner(owner) {
-    const next = OWNERS.includes(owner) ? owner : DEFAULT_OWNER;
-    window.__ACTIVE_OWNER = next;
-    localStorage.setItem("activeOwner", next);
-
-    document.querySelectorAll("[data-owner-tab]").forEach((button) => {
-      button.classList.toggle("active", button.dataset.ownerTab === next);
-    });
-
-    const ownerSelect = document.querySelector("#owner");
-    if (ownerSelect) ownerSelect.value = next;
-
-    injectMoveButtons();
   }
 
   function productsEndpoint(query = "") {
@@ -52,6 +51,81 @@ window.APP_CONFIG = {
       ...extra
     };
   }
+
+  function setCurrentOwner(owner) {
+    const next = OWNERS.includes(owner) ? owner : DEFAULT_OWNER;
+    window.__ACTIVE_OWNER = next;
+    localStorage.setItem("activeOwner", next);
+
+    document.querySelectorAll("[data-owner-tab]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.ownerTab === next);
+    });
+
+    const ownerSelect = document.querySelector("#owner");
+    if (ownerSelect) ownerSelect.value = next;
+
+    injectMoveButtons();
+    injectCardExtras();
+  }
+
+  function rowId(card) {
+    return (
+      card.querySelector("button[data-id]")?.dataset.id ||
+      card.querySelector("button[data-edit-id]")?.dataset.editId ||
+      card.querySelector("button[data-favorite-id]")?.dataset.favoriteId
+    );
+  }
+
+  function findRow(id) {
+    return visibleRows.find((row) => row.id === id);
+  }
+
+  function fieldValue(selector, fallback = "") {
+    return document.querySelector(selector)?.value?.trim() || fallback;
+  }
+
+  window.__ACTIVE_OWNER = currentOwner();
+
+  window.fetch = async (input, init = {}) => {
+    const url = typeof input === "string" ? input : input?.url || "";
+    const method = String(init?.method || input?.method || "GET").toUpperCase();
+
+    if (isProductsApi(url) && (method === "POST" || method === "PATCH") && init?.body) {
+      try {
+        const payload = JSON.parse(init.body);
+        payload.owner = fieldValue("#owner", currentOwner());
+        payload.note = fieldValue("#note");
+        payload.category = fieldValue("#category", "Diğer");
+        init = { ...init, body: JSON.stringify(payload) };
+      } catch {}
+    }
+
+    const response = await originalFetch(input, init);
+
+    if (isProductsApi(url) && method === "GET" && url.includes("select=") && response.ok) {
+      try {
+        const rows = await response.clone().json();
+        const owner = currentOwner();
+
+        visibleRows = Array.isArray(rows)
+          ? rows.filter((row) => (row.owner || DEFAULT_OWNER) === owner)
+          : [];
+
+        setTimeout(() => {
+          injectMoveButtons();
+          injectCardExtras();
+        }, 80);
+
+        return new Response(JSON.stringify(visibleRows), {
+          status: response.status,
+          statusText: response.statusText,
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch {}
+    }
+
+    return response;
+  };
 
   async function sendTestNotification(owner, button) {
     const topic = NTFY_TOPICS[owner];
@@ -71,7 +145,7 @@ window.APP_CONFIG = {
     });
 
     try {
-      await fetch(`https://ntfy.sh/${encodeURIComponent(topic)}/publish?${params.toString()}`, {
+      await originalFetch(`https://ntfy.sh/${encodeURIComponent(topic)}/publish?${params.toString()}`, {
         mode: "no-cors",
         cache: "no-store"
       });
@@ -87,43 +161,6 @@ window.APP_CONFIG = {
       alert("Test bildirimi gönderilemedi.");
     }
   }
-
-  window.__ACTIVE_OWNER = currentOwner();
-
-  window.fetch = async (input, init = {}) => {
-    const url = typeof input === "string" ? input : input?.url || "";
-    const method = String(init?.method || input?.method || "GET").toUpperCase();
-    const isProductsApi = url.includes(".supabase.co") && url.includes("/products");
-
-    if (isProductsApi && method === "GET" && url.includes("select=")) {
-      const response = await originalFetch(input, init);
-      if (!response.ok) return response;
-
-      const rows = await response.clone().json();
-      const owner = currentOwner();
-      const filtered = Array.isArray(rows)
-        ? rows.filter((row) => (row.owner || DEFAULT_OWNER) === owner)
-        : rows;
-
-      setTimeout(injectMoveButtons, 50);
-
-      return new Response(JSON.stringify(filtered), {
-        status: response.status,
-        statusText: response.statusText,
-        headers: { "Content-Type": "application/json" }
-      });
-    }
-
-    if (isProductsApi && (method === "POST" || method === "PATCH") && init?.body) {
-      try {
-        const payload = JSON.parse(init.body);
-        payload.owner = document.querySelector("#owner")?.value || currentOwner();
-        init = { ...init, body: JSON.stringify(payload) };
-      } catch {}
-    }
-
-    return originalFetch(input, init);
-  };
 
   async function moveProduct(id, targetOwner, button) {
     button.disabled = true;
@@ -145,11 +182,14 @@ window.APP_CONFIG = {
     document.querySelector("#refresh")?.click();
   }
 
-  function injectOwnerUi() {
+  function injectFormExtras() {
     const form = document.querySelector("#add-form");
-    const alertLabel = document.querySelector("#alert-mode")?.closest("label");
+    if (!form) return;
 
-    if (form && alertLabel && !document.querySelector("#owner")) {
+    const alertLabel = document.querySelector("#alert-mode")?.closest("label");
+    const actions = form.querySelector(".actions");
+
+    if (alertLabel && !document.querySelector("#owner")) {
       const label = document.createElement("label");
       label.innerHTML = `
         Kişi
@@ -161,6 +201,35 @@ window.APP_CONFIG = {
       form.insertBefore(label, alertLabel);
     }
 
+    const ownerLabel = document.querySelector("#owner")?.closest("label");
+
+    if (ownerLabel && !document.querySelector("#category")) {
+      const label = document.createElement("label");
+      label.innerHTML = `
+        Kategori
+        <select id="category">
+          <option value="Diğer">Diğer</option>
+          <option value="Elbise">Elbise</option>
+          <option value="Kitap">Kitap</option>
+          <option value="Elektronik">Elektronik</option>
+          <option value="Kozmetik">Kozmetik</option>
+        </select>
+      `;
+      form.insertBefore(label, ownerLabel);
+    }
+
+    if (actions && !document.querySelector("#note")) {
+      const label = document.createElement("label");
+      label.className = "note-field";
+      label.innerHTML = `
+        Ürün notu
+        <textarea id="note" rows="2" placeholder="Örn: Selin için, hediye olabilir, indirim bekleniyor"></textarea>
+      `;
+      form.insertBefore(label, actions);
+    }
+  }
+
+  function injectOwnerTabs() {
     const listSection = document.querySelector("#products")?.closest("section");
     const listTitle = listSection?.querySelector("h2");
 
@@ -182,15 +251,12 @@ window.APP_CONFIG = {
       });
     }
 
-    injectNotificationTestUi();
     setCurrentOwner(currentOwner());
   }
 
-  function injectNotificationTestUi() {
-    const listSection = document.querySelector("#products")?.closest("section");
+  function injectNotificationTests() {
     const tabs = document.querySelector(".owner-tabs");
-
-    if (!listSection || !tabs || document.querySelector(".notification-tests")) return;
+    if (!tabs || document.querySelector(".notification-tests")) return;
 
     const box = document.createElement("div");
     box.className = "notification-tests";
@@ -206,18 +272,19 @@ window.APP_CONFIG = {
     const targetOwner = otherOwner();
 
     document.querySelectorAll("#products .product").forEach((card) => {
-      if (card.querySelector("[data-move-owner-id]")) return;
-
-      const id =
-        card.querySelector("button[data-id]")?.dataset.id ||
-        card.querySelector("button[data-edit-id]")?.dataset.editId ||
-        card.querySelector("button[data-favorite-id]")?.dataset.favoriteId;
-
+      const id = rowId(card);
       const actions =
         card.querySelector(".product-actions") ||
         card.querySelector("button[data-id]")?.parentElement;
 
       if (!id || !actions) return;
+
+      const existing = card.querySelector("[data-move-owner-id]");
+      if (existing) {
+        existing.dataset.targetOwner = targetOwner;
+        existing.textContent = `${targetOwner}'e taşı`;
+        return;
+      }
 
       const button = document.createElement("button");
       button.className = "secondary move-owner";
@@ -235,11 +302,52 @@ window.APP_CONFIG = {
     });
   }
 
-  function injectOwnerStyles() {
-    if (document.querySelector("#owner-tab-styles")) return;
+  function injectCardExtras() {
+    document.querySelectorAll("#products .product").forEach((card) => {
+      const id = rowId(card);
+      const row = findRow(id);
+      if (!row) return;
+
+      card.querySelector(".category-badge")?.remove();
+      card.querySelector(".product-note")?.remove();
+
+      const title = card.querySelector(".title");
+      const body = card.querySelector(".product-body") || card.firstElementChild;
+      if (!title || !body) return;
+
+      const category = row.category || "Diğer";
+      const badge = document.createElement("span");
+      badge.className = `category-badge category-${CATEGORIES[category] || "other"}`;
+      badge.textContent = category;
+      title.appendChild(badge);
+
+      if (row.note) {
+        const note = document.createElement("div");
+        note.className = "product-note";
+        note.textContent = `Not: ${row.note}`;
+        title.insertAdjacentElement("afterend", note);
+      }
+    });
+  }
+
+  function fillExtraFields(id) {
+    const row = findRow(id);
+    if (!row) return;
+
+    const owner = document.querySelector("#owner");
+    const category = document.querySelector("#category");
+    const note = document.querySelector("#note");
+
+    if (owner) owner.value = row.owner || currentOwner();
+    if (category) category.value = row.category || "Diğer";
+    if (note) note.value = row.note || "";
+  }
+
+  function injectStyles() {
+    if (document.querySelector("#app-config-extension-styles")) return;
 
     const style = document.createElement("style");
-    style.id = "owner-tab-styles";
+    style.id = "app-config-extension-styles";
     style.textContent = `
       .owner-tabs {
         display: grid;
@@ -301,150 +409,11 @@ window.APP_CONFIG = {
         color: white !important;
       }
 
-      #owner {
+      #owner,
+      #category {
         font-weight: 700;
       }
 
-      @media (max-width: 520px) {
-        .owner-tabs,
-        .notification-tests {
-          grid-template-columns: 1fr;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    injectOwnerStyles();
-    injectOwnerUi();
-
-    const list = document.querySelector("#products");
-    if (list) {
-      new MutationObserver(() => injectMoveButtons()).observe(list, {
-        childList: true,
-        subtree: true
-      });
-    }
-
-    document.addEventListener(
-      "click",
-      (event) => {
-        const testButton = event.target.closest("[data-test-owner]");
-        if (testButton) {
-          event.preventDefault();
-          event.stopPropagation();
-          sendTestNotification(testButton.dataset.testOwner, testButton);
-          return;
-        }
-
-        const moveButton = event.target.closest("[data-move-owner-id]");
-        if (!moveButton) return;
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        moveProduct(moveButton.dataset.moveOwnerId, moveButton.dataset.targetOwner, moveButton).catch((error) => {
-          console.error(error);
-          alert(error.message);
-        });
-      },
-      true
-    );
-
-    injectMoveButtons();
-  });
-})();
-
-(() => {
-  const previousFetch = window.fetch.bind(window);
-  let noteRows = [];
-
-  function isProductsApi(url) {
-    return String(url || "").includes(".supabase.co") && String(url || "").includes("/products");
-  }
-
-  function noteValue() {
-    return document.querySelector("#note")?.value.trim() || "";
-  }
-
-  window.fetch = async (input, init = {}) => {
-    const url = typeof input === "string" ? input : input?.url || "";
-    const method = String(init?.method || input?.method || "GET").toUpperCase();
-
-    if (isProductsApi(url) && (method === "POST" || method === "PATCH") && init?.body) {
-      try {
-        const payload = JSON.parse(init.body);
-        payload.note = noteValue();
-        init = { ...init, body: JSON.stringify(payload) };
-      } catch {}
-    }
-
-    const response = await previousFetch(input, init);
-
-    if (isProductsApi(url) && method === "GET" && url.includes("select=") && response.ok) {
-      try {
-        const rows = await response.clone().json();
-        noteRows = Array.isArray(rows) ? rows : [];
-        setTimeout(injectProductNotes, 80);
-
-        return new Response(JSON.stringify(rows), {
-          status: response.status,
-          statusText: response.statusText,
-          headers: { "Content-Type": "application/json" }
-        });
-      } catch {}
-    }
-
-    return response;
-  };
-
-  function injectNoteField() {
-    const form = document.querySelector("#add-form");
-    const productLabel = document.querySelector("#product")?.closest("label");
-
-    if (!form || !productLabel || document.querySelector("#note")) return;
-
-    const label = document.createElement("label");
-    label.className = "note-field";
-    label.innerHTML = `
-      Ürün notu
-      <textarea id="note" rows="2" placeholder="Örn: Selin için, hediye olabilir, indirim bekleniyor"></textarea>
-    `;
-
-    form.insertBefore(label, productLabel);
-  }
-
-  function injectProductNotes() {
-    document.querySelectorAll("#products .product").forEach((card) => {
-      const id =
-        card.querySelector("button[data-id]")?.dataset.id ||
-        card.querySelector("button[data-edit-id]")?.dataset.editId ||
-        card.querySelector("button[data-favorite-id]")?.dataset.favoriteId;
-
-      const row = noteRows.find((item) => item.id === id);
-      const oldNote = card.querySelector(".product-note");
-
-      if (oldNote) oldNote.remove();
-      if (!row?.note) return;
-
-      const body = card.querySelector(".product-body") || card.firstElementChild;
-      const title = body?.querySelector(".title");
-      if (!body || !title) return;
-
-      const note = document.createElement("div");
-      note.className = "product-note";
-      note.textContent = `Not: ${row.note}`;
-      title.insertAdjacentElement("afterend", note);
-    });
-  }
-
-  function injectNoteStyles() {
-    if (document.querySelector("#note-extension-styles")) return;
-
-    const style = document.createElement("style");
-    style.id = "note-extension-styles";
-    style.textContent = `
       .note-field {
         grid-column: span 2;
       }
@@ -481,9 +450,32 @@ window.APP_CONFIG = {
         overflow-wrap: anywhere;
       }
 
+      .category-badge {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 8px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .category-other { background: #eef2ff; color: #334155; }
+      .category-dress { background: #ffe4f1; color: #a21caf; }
+      .category-book { background: #dcfce7; color: #15803d; }
+      .category-tech { background: #dbeafe; color: #1d4ed8; }
+      .category-beauty { background: #ffedd5; color: #c2410c; }
+
       @media (max-width: 760px) {
         .note-field {
           grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .owner-tabs,
+        .notification-tests {
+          grid-template-columns: 1fr;
         }
       }
     `;
@@ -492,12 +484,17 @@ window.APP_CONFIG = {
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    injectNoteStyles();
-    injectNoteField();
+    injectStyles();
+    injectFormExtras();
+    injectOwnerTabs();
+    injectNotificationTests();
 
     const list = document.querySelector("#products");
     if (list) {
-      new MutationObserver(() => injectProductNotes()).observe(list, {
+      new MutationObserver(() => {
+        injectMoveButtons();
+        injectCardExtras();
+      }).observe(list, {
         childList: true,
         subtree: true
       });
@@ -506,19 +503,35 @@ window.APP_CONFIG = {
     document.addEventListener(
       "click",
       (event) => {
-        const editButton = event.target.closest("button[data-edit-id]");
-        if (!editButton) return;
+        const testButton = event.target.closest("[data-test-owner]");
+        if (testButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          sendTestNotification(testButton.dataset.testOwner, testButton);
+          return;
+        }
 
-        setTimeout(() => {
-          const row = noteRows.find((item) => item.id === editButton.dataset.editId);
-          const note = document.querySelector("#note");
-          if (note) note.value = row?.note || "";
-        }, 0);
+        const moveButton = event.target.closest("[data-move-owner-id]");
+        if (moveButton) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          moveProduct(moveButton.dataset.moveOwnerId, moveButton.dataset.targetOwner, moveButton).catch((error) => {
+            console.error(error);
+            alert(error.message);
+          });
+          return;
+        }
+
+        const editButton = event.target.closest("button[data-edit-id]");
+        if (editButton) {
+          setTimeout(() => fillExtraFields(editButton.dataset.editId), 0);
+        }
       },
       true
     );
 
-    injectProductNotes();
+    injectMoveButtons();
+    injectCardExtras();
   });
 })();
-
