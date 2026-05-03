@@ -423,6 +423,49 @@ def kitapyurdu_snapshot(html: str, final_url: str) -> ProductSnapshot:
         source=final_url,
     )
 
+def hepsiburada_snapshot(html: str, final_url: str) -> ProductSnapshot:
+    text = plain_html_text(html)
+    title = meta_content(html, "og:title") or "Hepsiburada ürünü"
+
+    price = None
+    price_patterns = [
+        r'"price"\s*:\s*"?([0-9][0-9.,]*)"?',
+        r'"finalPrice"\s*:\s*"?([0-9][0-9.,]*)"?',
+        r'"discountedPrice"\s*:\s*"?([0-9][0-9.,]*)"?',
+        r'"amount"\s*:\s*"?([0-9][0-9.,]*)"?',
+        r"([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2})\s*TL",
+    ]
+
+    for pattern in price_patterns:
+        match = re.search(pattern, html, flags=re.IGNORECASE)
+        if not match:
+            match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            price = parse_price_string(match.group(1))
+            if price is not None:
+                break
+
+    normalized = normalize_text(text)
+    false_words = ("stokta yok", "tükendi", "satışta değildir", "ürün geçici olarak temin edilememektedir")
+    true_words = ("sepete ekle", "stok adedi", "500 adetten az", "kargoya verilir")
+
+    if any(word in normalized for word in false_words):
+        overall_stock = False
+    elif any(word in normalized for word in true_words):
+        overall_stock = True
+    else:
+        overall_stock = None
+
+    return ProductSnapshot(
+        title=title,
+        price=price,
+        currency="TL",
+        matching_sizes=[],
+        stock_known=True,
+        overall_stock=overall_stock,
+        source=final_url,
+    )
+
 def fetch_snapshot(config: dict[str, Any]) -> ProductSnapshot:
     last_error: Exception | None = None
     for url in candidate_urls(config):
@@ -431,6 +474,8 @@ def fetch_snapshot(config: dict[str, Any]) -> ProductSnapshot:
             host = urlparse(final_url).netloc.lower()
             if "kitapyurdu.com" in host:
                 return kitapyurdu_snapshot(text, final_url)
+            if "hepsiburada.com" in host:
+                return hepsiburada_snapshot(text, final_url)
             payload = parse_payload(text)
             if not color_matches(payload, list(config.get("color_keywords", []))):
                 continue
