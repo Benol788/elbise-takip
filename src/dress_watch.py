@@ -479,6 +479,7 @@ def fetch_snapshot(config: dict[str, Any]) -> ProductSnapshot:
     for url in candidate_urls(config):
         try:
             request_url = proxied_url(url)
+            print(f"Okuma adresi: {request_url}")
             text, final_url = request_text(request_url)
             host = urlparse(url).netloc.lower()
             if "kitapyurdu.com" in host:
