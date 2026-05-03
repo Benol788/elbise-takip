@@ -699,6 +699,12 @@ def run_once(config: dict[str, Any], config_path: Path, force_notify: bool = Fal
             name = product_config.get("name") or product_config.get("product_id") or product_config.get("product_url")
             print(f"Ürün duraklatıldı, kontrol atlandı: {name}")
             continue
+            
+        product_url = str(product_config.get("product_url") or "").lower()
+        if "hepsiburada.com" in product_url or "kitapyurdu.com" in product_url:
+            name = product_config.get("name") or product_config.get("product_id") or product_config.get("product_url")
+            print(f"Yerel bilgisayar kontrol edecek, bulut kontrolü atlandı: {name}")
+            continue
 
         try:
             snapshots.append(run_product_once(product_config, config, config_path, state, force_notify))
