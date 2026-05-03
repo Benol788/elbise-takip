@@ -804,14 +804,21 @@
 
       function checkedAtText(value) {
         if (!value) return "Son kontrol: henüz yok";
+
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) return "Son kontrol: bilinmiyor";
-        return `Son kontrol: ${date.toLocaleString("tr-TR", {
-          day: "2-digit",
-          month: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit"
-        })}`;
+
+        const diffMs = Date.now() - date.getTime();
+        const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+
+        if (diffMinutes < 1) return "Son kontrol: az önce";
+        if (diffMinutes < 60) return `Son kontrol: ${diffMinutes} dk önce`;
+ 
+        const diffHours = Math.floor(diffMinutes / 60);
+        if (diffHours < 24) return `Son kontrol: ${diffHours} saat önce`;
+
+        const diffDays = Math.floor(diffHours / 24);
+        return `Son kontrol: ${diffDays} gün önce`;
       }
 
       function alertModeText(value) {
