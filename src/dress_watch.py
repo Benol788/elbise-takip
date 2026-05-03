@@ -14,6 +14,8 @@ from urllib.parse import quote, urlencode, urlparse
 from urllib.request import Request, urlopen
 
 
+PROXY_BASE_URL = "https://urun-okuyucu.darendelikerim.workers.dev"
+
 DEFAULT_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -122,6 +124,12 @@ def supabase_products() -> list[dict[str, Any]]:
         products.append(product)
     return products
 
+
+def proxied_url(url: str) -> str:
+    host = urlparse(url).netloc.lower()
+    if "kitapyurdu.com" in host:
+        return f"{PROXY_BASE_URL}/?url={quote(url, safe='')}"
+    return url
 
 def candidate_urls(config: dict[str, Any]) -> list[str]:
     product_id = str(config.get("product_id", "")).strip()
@@ -470,10 +478,11 @@ def fetch_snapshot(config: dict[str, Any]) -> ProductSnapshot:
     last_error: Exception | None = None
     for url in candidate_urls(config):
         try:
-            text, final_url = request_text(url)
-            host = urlparse(final_url).netloc.lower()
+            request_url = proxied_url(url)
+            text, final_url = request_text(request_url)
+            host = urlparse(url).netloc.lower()
             if "kitapyurdu.com" in host:
-                return kitapyurdu_snapshot(text, final_url)
+                return kitapyurdu_snapshot(text, url)
             if "hepsiburada.com" in host:
                 return hepsiburada_snapshot(text, final_url)
             payload = parse_payload(text)
