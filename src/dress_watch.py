@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlparse
 from urllib.request import Request, urlopen
 
 
@@ -371,11 +371,62 @@ def color_matches(payload: Any, color_keywords: list[str]) -> bool:
     return any(normalize_text(keyword) in text for keyword in color_keywords)
 
 
+def plain_html_text(html: str) -> str:
+    text = re.sub(r"<script.*?</script>", " ", html, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<style.*?</style>", " ", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = text.replace("&nbsp;", " ")
+    text = text.replace("&#8378;", "TL")
+    text = text.replace("&quot;", '"')
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def meta_content(html: str, name: str) -> str | None:
+    patterns = [
+        rf'<meta[^>]+property=["\']{re.escape(name)}["\'][^>]+content=["\']([^"\']+)["\']',
+        rf'<meta[^>]+name=["\']{re.escape(name)}["\'][^>]+content=["\']([^"\']+)["\']',
+        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']{re.escape(name)}["\']',
+        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+name=["\']{re.escape(name)}["\']',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, html, flags=re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+    return None
+
+
+def kitapyurdu_snapshot(html: str, final_url: str) -> ProductSnapshot:
+    text = plain_html_text(html)
+    title = meta_content(html, "og:title") or "Kitapyurdu ürünü"
+
+    price = None
+    price_match = re.search(r"Kitapyurdu\s+Fiyat[ıi]\s*:?\s*([0-9][0-9.,]*)", text, flags=re.IGNORECASE)
+    if price_match:
+        price = parse_price_string(price_match.group(1))
+
+    false_words = ("stokta yok", "tükendi", "temin edilemiyor", "satışta değildir")
+    overall_stock = not any(word in normalize_text(text) for word in false_words)
+    if "sepete ekle" not in normalize_text(text) and "kargoya verilir" not in normalize_text(text):
+        overall_stock = None
+
+    return ProductSnapshot(
+        title=title,
+        price=price,
+        currency="TL",
+        matching_sizes=[],
+        stock_known=True,
+        overall_stock=overall_stock,
+        source=final_url,
+    )
+
 def fetch_snapshot(config: dict[str, Any]) -> ProductSnapshot:
     last_error: Exception | None = None
     for url in candidate_urls(config):
         try:
             text, final_url = request_text(url)
+            host = urlparse(final_url).netloc.lower()
+            if "kitapyurdu.com" in host:
+                return kitapyurdu_snapshot(text, final_url)
             payload = parse_payload(text)
             if not color_matches(payload, list(config.get("color_keywords", []))):
                 continue
