@@ -305,19 +305,23 @@
       .product::after {
         content: "";
         position: absolute;
-        right: 18px;
-        top: 14px;
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
-        background:
-          radial-gradient(circle at 50% 50%, rgba(255, 229, 133, 0.55) 0 8%, transparent 9%),
-          radial-gradient(ellipse at 50% 18%, rgba(255, 122, 182, 0.16) 0 18%, transparent 19%),
-          radial-gradient(ellipse at 82% 50%, rgba(109, 214, 165, 0.16) 0 18%, transparent 19%),
-          radial-gradient(ellipse at 50% 82%, rgba(125, 140, 255, 0.14) 0 18%, transparent 19%),
-          radial-gradient(ellipse at 18% 50%, rgba(255, 122, 182, 0.14) 0 18%, transparent 19%);
-        opacity: 0.55;
+        right: 22px;
+        top: 18px;
+        width: 96px;
+        height: 76px;
+        opacity: 0.22;
         pointer-events: none;
+        background:
+          radial-gradient(circle at 18px 36px, #ff4f9a 0 7px, transparent 8px),
+          radial-gradient(circle at 8px 20px, #ff4f9a 0 4px, transparent 5px),
+          radial-gradient(circle at 20px 13px, #ff4f9a 0 4px, transparent 5px),
+          radial-gradient(circle at 33px 20px, #ff4f9a 0 4px, transparent 5px),
+
+          radial-gradient(circle at 70px 44px, #527cff 0 7px, transparent 8px),
+          radial-gradient(circle at 60px 28px, #527cff 0 4px, transparent 5px),
+          radial-gradient(circle at 72px 21px, #527cff 0 4px, transparent 5px),
+          radial-gradient(circle at 85px 28px, #527cff 0 4px, transparent 5px);
+        transform: rotate(-12deg);
       }
 
       .product > * {
@@ -330,13 +334,13 @@
       }
 
       .product.target-hit {
-        border-color: rgba(24, 185, 120, 0.55);
-        background: linear-gradient(135deg, rgba(232, 255, 243, 0.96), rgba(245, 255, 250, 0.88));
+        border-color: rgba(24, 185, 120, 0.78);
+        background: linear-gradient(135deg, rgba(214, 255, 235, 0.98), rgba(235, 255, 245, 0.94));
       }
 
       .product.favorite {
-        border-color: rgba(245, 163, 0, 0.58);
-        background: linear-gradient(135deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 237, 0.94));
+        border-color: rgba(245, 163, 0, 0.82);
+        background: linear-gradient(135deg, rgba(255, 245, 204, 0.98), rgba(255, 238, 210, 0.95));
       }
 
       .product.paused {
@@ -354,7 +358,7 @@
       }
 
       .star {
-        color: var(--yellow);
+        color: #f2a000;
         font-size: 19px;
         line-height: 1;
         text-shadow: 0 1px 4px rgba(245, 163, 0, 0.28);
