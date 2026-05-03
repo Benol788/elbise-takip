@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import html as html_lib
 import os
 import re
 import time
@@ -383,10 +384,11 @@ def color_matches(payload: Any, color_keywords: list[str]) -> bool:
     return any(normalize_text(keyword) in text for keyword in color_keywords)
 
 
-def plain_html_text(html: str) -> str:
+ def plain_html_text(html: str) -> str:  
     text = re.sub(r"<script.*?</script>", " ", html, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r"<style.*?</style>", " ", text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r"<[^>]+>", " ", text)
+    text = html_lib.unescape(text)
     text = text.replace("&nbsp;", " ")
     text = text.replace("&#8378;", "TL")
     text = text.replace("&quot;", '"')
@@ -412,9 +414,18 @@ def kitapyurdu_snapshot(html: str, final_url: str) -> ProductSnapshot:
     title = meta_content(html, "og:title") or "Kitapyurdu ürünü"
 
     price = None
-    price_match = re.search(r"Kitapyurdu\s+Fiyat[ıi]\s*:?\s*([0-9][0-9.,]*)", text, flags=re.IGNORECASE)
-    if price_match:
-        price = parse_price_string(price_match.group(1))
+    price_patterns = [
+       r"Kitapyurdu\s+Fiyat[ıi]\s*:?\s*([0-9][0-9.,]*)",
+       r"Kitapyurdu\s+Fiyat[ıi].{0,40}?([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2})",
+       r"([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2})\s*TL",
+    ]
+
+    for pattern in price_patterns:
+        price_match = re.search(pattern, text, flags=re.IGNORECASE)
+        if price_match:
+            price = parse_price_string(price_match.group(1))
+            if price is not None:
+                break
 
     false_words = ("stokta yok", "tükendi", "temin edilemiyor", "satışta değildir")
     overall_stock = not any(word in normalize_text(text) for word in false_words)
