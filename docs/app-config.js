@@ -6,6 +6,11 @@ window.APP_CONFIG = {
 (() => {
   const OWNERS = ["Kerim", "Selin"];
   const DEFAULT_OWNER = "Kerim";
+  const NTFY_TOPICS = {
+    Kerim: "abdul-elbise-660272836-20260502",
+    Selin: "selin-elbise-20260503-9c7f2a"
+  };
+
   const originalFetch = window.fetch.bind(window);
 
   function currentOwner() {
@@ -46,6 +51,41 @@ window.APP_CONFIG = {
       "Content-Type": "application/json",
       ...extra
     };
+  }
+
+  async function sendTestNotification(owner, button) {
+    const topic = NTFY_TOPICS[owner];
+    if (!topic) {
+      alert("Bildirim kanalı bulunamadı.");
+      return;
+    }
+
+    const oldText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Gönderiliyor";
+
+    const params = new URLSearchParams({
+      title: `${owner} test bildirimi`,
+      message: `${owner} için test bildirimi gönderildi.\nPanel bildirimi çalışıyor.`,
+      tags: "bell,shopping"
+    });
+
+    try {
+      await fetch(`https://ntfy.sh/${encodeURIComponent(topic)}/publish?${params.toString()}`, {
+        mode: "no-cors",
+        cache: "no-store"
+      });
+
+      button.textContent = "Gönderildi";
+      setTimeout(() => {
+        button.disabled = false;
+        button.textContent = oldText;
+      }, 1600);
+    } catch {
+      button.disabled = false;
+      button.textContent = oldText;
+      alert("Test bildirimi gönderilemedi.");
+    }
   }
 
   window.__ACTIVE_OWNER = currentOwner();
@@ -142,7 +182,24 @@ window.APP_CONFIG = {
       });
     }
 
+    injectNotificationTestUi();
     setCurrentOwner(currentOwner());
+  }
+
+  function injectNotificationTestUi() {
+    const listSection = document.querySelector("#products")?.closest("section");
+    const tabs = document.querySelector(".owner-tabs");
+
+    if (!listSection || !tabs || document.querySelector(".notification-tests")) return;
+
+    const box = document.createElement("div");
+    box.className = "notification-tests";
+    box.innerHTML = `
+      <button class="notify-test kerim" data-test-owner="Kerim" type="button">Kerim test bildirimi</button>
+      <button class="notify-test selin" data-test-owner="Selin" type="button">Selin test bildirimi</button>
+    `;
+
+    tabs.insertAdjacentElement("afterend", box);
   }
 
   function injectMoveButtons() {
@@ -188,7 +245,7 @@ window.APP_CONFIG = {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
-        margin: 0 0 14px;
+        margin: 0 0 10px;
         padding: 6px;
         border: 1px solid rgba(123, 140, 180, 0.2);
         border-radius: 16px;
@@ -210,6 +267,35 @@ window.APP_CONFIG = {
         box-shadow: 0 10px 22px rgba(82, 124, 255, 0.22);
       }
 
+      .notification-tests {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 0 0 14px;
+      }
+
+      .notify-test {
+        min-height: 38px;
+        border: 0;
+        border-radius: 12px;
+        color: white;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .notify-test.kerim {
+        background: linear-gradient(135deg, #1f8ef1, #527cff);
+      }
+
+      .notify-test.selin {
+        background: linear-gradient(135deg, #ff6da8, #9b7cff);
+      }
+
+      .notify-test:disabled {
+        opacity: 0.72;
+        cursor: wait;
+      }
+
       .move-owner {
         background: linear-gradient(135deg, #6d7cff, #9b7cff) !important;
         color: white !important;
@@ -220,7 +306,8 @@ window.APP_CONFIG = {
       }
 
       @media (max-width: 520px) {
-        .owner-tabs {
+        .owner-tabs,
+        .notification-tests {
           grid-template-columns: 1fr;
         }
       }
@@ -243,13 +330,21 @@ window.APP_CONFIG = {
     document.addEventListener(
       "click",
       (event) => {
-        const button = event.target.closest("[data-move-owner-id]");
-        if (!button) return;
+        const testButton = event.target.closest("[data-test-owner]");
+        if (testButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          sendTestNotification(testButton.dataset.testOwner, testButton);
+          return;
+        }
+
+        const moveButton = event.target.closest("[data-move-owner-id]");
+        if (!moveButton) return;
 
         event.preventDefault();
         event.stopPropagation();
 
-        moveProduct(button.dataset.moveOwnerId, button.dataset.targetOwner, button).catch((error) => {
+        moveProduct(moveButton.dataset.moveOwnerId, moveButton.dataset.targetOwner, moveButton).catch((error) => {
           console.error(error);
           alert(error.message);
         });
