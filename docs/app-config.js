@@ -13,6 +13,10 @@ window.APP_CONFIG = {
     return OWNERS.includes(saved) ? saved : DEFAULT_OWNER;
   }
 
+  function otherOwner() {
+    return currentOwner() === "Kerim" ? "Selin" : "Kerim";
+  }
+
   function setCurrentOwner(owner) {
     const next = OWNERS.includes(owner) ? owner : DEFAULT_OWNER;
     window.__ACTIVE_OWNER = next;
@@ -24,6 +28,24 @@ window.APP_CONFIG = {
 
     const ownerSelect = document.querySelector("#owner");
     if (ownerSelect) ownerSelect.value = next;
+
+    injectMoveButtons();
+  }
+
+  function productsEndpoint(query = "") {
+    const raw = window.APP_CONFIG.supabaseUrl.replace(/\/$/, "");
+    const base = raw.includes("/rest/v1") ? raw : `${raw}/rest/v1`;
+    return `${base}/products${query}`;
+  }
+
+  function supabaseHeaders(extra = {}) {
+    const key = window.APP_CONFIG.supabaseAnonKey;
+    return {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      ...extra
+    };
   }
 
   window.__ACTIVE_OWNER = currentOwner();
@@ -43,6 +65,8 @@ window.APP_CONFIG = {
         ? rows.filter((row) => (row.owner || DEFAULT_OWNER) === owner)
         : rows;
 
+      setTimeout(injectMoveButtons, 50);
+
       return new Response(JSON.stringify(filtered), {
         status: response.status,
         statusText: response.statusText,
@@ -60,6 +84,26 @@ window.APP_CONFIG = {
 
     return originalFetch(input, init);
   };
+
+  async function moveProduct(id, targetOwner, button) {
+    button.disabled = true;
+    button.textContent = "Taşınıyor";
+
+    const response = await originalFetch(productsEndpoint(`?id=eq.${encodeURIComponent(id)}`), {
+      method: "PATCH",
+      headers: supabaseHeaders({ Prefer: "return=minimal" }),
+      body: JSON.stringify({ owner: targetOwner })
+    });
+
+    if (!response.ok) {
+      button.disabled = false;
+      button.textContent = `${targetOwner}'e taşı`;
+      throw new Error("Ürün taşınamadı.");
+    }
+
+    button.textContent = "Taşındı";
+    document.querySelector("#refresh")?.click();
+  }
 
   function injectOwnerUi() {
     const form = document.querySelector("#add-form");
@@ -101,6 +145,39 @@ window.APP_CONFIG = {
     setCurrentOwner(currentOwner());
   }
 
+  function injectMoveButtons() {
+    const targetOwner = otherOwner();
+
+    document.querySelectorAll("#products .product").forEach((card) => {
+      if (card.querySelector("[data-move-owner-id]")) return;
+
+      const id =
+        card.querySelector("button[data-id]")?.dataset.id ||
+        card.querySelector("button[data-edit-id]")?.dataset.editId ||
+        card.querySelector("button[data-favorite-id]")?.dataset.favoriteId;
+
+      const actions =
+        card.querySelector(".product-actions") ||
+        card.querySelector("button[data-id]")?.parentElement;
+
+      if (!id || !actions) return;
+
+      const button = document.createElement("button");
+      button.className = "secondary move-owner";
+      button.type = "button";
+      button.dataset.moveOwnerId = id;
+      button.dataset.targetOwner = targetOwner;
+      button.textContent = `${targetOwner}'e taşı`;
+
+      const editButton = actions.querySelector("button[data-edit-id]");
+      if (editButton) {
+        actions.insertBefore(button, editButton);
+      } else {
+        actions.prepend(button);
+      }
+    });
+  }
+
   function injectOwnerStyles() {
     if (document.querySelector("#owner-tab-styles")) return;
 
@@ -133,6 +210,11 @@ window.APP_CONFIG = {
         box-shadow: 0 10px 22px rgba(82, 124, 255, 0.22);
       }
 
+      .move-owner {
+        background: linear-gradient(135deg, #6d7cff, #9b7cff) !important;
+        color: white !important;
+      }
+
       #owner {
         font-weight: 700;
       }
@@ -149,5 +231,32 @@ window.APP_CONFIG = {
   document.addEventListener("DOMContentLoaded", () => {
     injectOwnerStyles();
     injectOwnerUi();
+
+    const list = document.querySelector("#products");
+    if (list) {
+      new MutationObserver(() => injectMoveButtons()).observe(list, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    document.addEventListener(
+      "click",
+      (event) => {
+        const button = event.target.closest("[data-move-owner-id]");
+        if (!button) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        moveProduct(button.dataset.moveOwnerId, button.dataset.targetOwner, button).catch((error) => {
+          console.error(error);
+          alert(error.message);
+        });
+      },
+      true
+    );
+
+    injectMoveButtons();
   });
 })();
