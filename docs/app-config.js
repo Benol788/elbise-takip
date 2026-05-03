@@ -308,6 +308,9 @@ window.APP_CONFIG = {
       const row = findRow(id);
       if (!row) return;
 
+      if (card.dataset.extrasReady === `${row.category || "Diğer"}-${row.note || ""}`) return;
+      card.dataset.extrasReady = `${row.category || "Diğer"}-${row.note || ""}`;
+
       card.querySelector(".category-badge")?.remove();
       card.querySelector(".product-note")?.remove();
 
