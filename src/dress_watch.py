@@ -384,7 +384,7 @@ def color_matches(payload: Any, color_keywords: list[str]) -> bool:
     return any(normalize_text(keyword) in text for keyword in color_keywords)
 
 
- def plain_html_text(html: str) -> str:  
+def plain_html_text(html: str) -> str:  
     text = re.sub(r"<script.*?</script>", " ", html, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r"<style.*?</style>", " ", text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r"<[^>]+>", " ", text)
