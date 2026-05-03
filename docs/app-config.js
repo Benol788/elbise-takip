@@ -355,3 +355,170 @@ window.APP_CONFIG = {
     injectMoveButtons();
   });
 })();
+
+(() => {
+  const previousFetch = window.fetch.bind(window);
+  let noteRows = [];
+
+  function isProductsApi(url) {
+    return String(url || "").includes(".supabase.co") && String(url || "").includes("/products");
+  }
+
+  function noteValue() {
+    return document.querySelector("#note")?.value.trim() || "";
+  }
+
+  window.fetch = async (input, init = {}) => {
+    const url = typeof input === "string" ? input : input?.url || "";
+    const method = String(init?.method || input?.method || "GET").toUpperCase();
+
+    if (isProductsApi(url) && (method === "POST" || method === "PATCH") && init?.body) {
+      try {
+        const payload = JSON.parse(init.body);
+        payload.note = noteValue();
+        init = { ...init, body: JSON.stringify(payload) };
+      } catch {}
+    }
+
+    const response = await previousFetch(input, init);
+
+    if (isProductsApi(url) && method === "GET" && url.includes("select=") && response.ok) {
+      try {
+        const rows = await response.clone().json();
+        noteRows = Array.isArray(rows) ? rows : [];
+        setTimeout(injectProductNotes, 80);
+
+        return new Response(JSON.stringify(rows), {
+          status: response.status,
+          statusText: response.statusText,
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch {}
+    }
+
+    return response;
+  };
+
+  function injectNoteField() {
+    const form = document.querySelector("#add-form");
+    const productLabel = document.querySelector("#product")?.closest("label");
+
+    if (!form || !productLabel || document.querySelector("#note")) return;
+
+    const label = document.createElement("label");
+    label.className = "note-field";
+    label.innerHTML = `
+      Ürün notu
+      <textarea id="note" rows="2" placeholder="Örn: Selin için, hediye olabilir, indirim bekleniyor"></textarea>
+    `;
+
+    form.insertBefore(label, productLabel);
+  }
+
+  function injectProductNotes() {
+    document.querySelectorAll("#products .product").forEach((card) => {
+      const id =
+        card.querySelector("button[data-id]")?.dataset.id ||
+        card.querySelector("button[data-edit-id]")?.dataset.editId ||
+        card.querySelector("button[data-favorite-id]")?.dataset.favoriteId;
+
+      const row = noteRows.find((item) => item.id === id);
+      const oldNote = card.querySelector(".product-note");
+
+      if (oldNote) oldNote.remove();
+      if (!row?.note) return;
+
+      const body = card.querySelector(".product-body") || card.firstElementChild;
+      const title = body?.querySelector(".title");
+      if (!body || !title) return;
+
+      const note = document.createElement("div");
+      note.className = "product-note";
+      note.textContent = `Not: ${row.note}`;
+      title.insertAdjacentElement("afterend", note);
+    });
+  }
+
+  function injectNoteStyles() {
+    if (document.querySelector("#note-extension-styles")) return;
+
+    const style = document.createElement("style");
+    style.id = "note-extension-styles";
+    style.textContent = `
+      .note-field {
+        grid-column: span 2;
+      }
+
+      #note {
+        width: 100%;
+        resize: vertical;
+        min-height: 48px;
+        border: 1px solid #d6e0f2;
+        border-radius: 14px;
+        padding: 11px 12px;
+        color: #172554;
+        background: rgba(255, 255, 255, 0.92);
+        font: inherit;
+        font-weight: 600;
+        outline: none;
+      }
+
+      #note:focus {
+        border-color: #7c9cff;
+        box-shadow: 0 0 0 4px rgba(124, 156, 255, 0.18);
+      }
+
+      .product-note {
+        width: fit-content;
+        max-width: 100%;
+        margin: 7px 0 8px;
+        padding: 7px 10px;
+        border-radius: 12px;
+        background: rgba(255, 122, 182, 0.14);
+        color: #8a2459;
+        font-size: 14px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+      }
+
+      @media (max-width: 760px) {
+        .note-field {
+          grid-column: 1 / -1;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    injectNoteStyles();
+    injectNoteField();
+
+    const list = document.querySelector("#products");
+    if (list) {
+      new MutationObserver(() => injectProductNotes()).observe(list, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    document.addEventListener(
+      "click",
+      (event) => {
+        const editButton = event.target.closest("button[data-edit-id]");
+        if (!editButton) return;
+
+        setTimeout(() => {
+          const row = noteRows.find((item) => item.id === editButton.dataset.editId);
+          const note = document.querySelector("#note");
+          if (note) note.value = row?.note || "";
+        }, 0);
+      },
+      true
+    );
+
+    injectProductNotes();
+  });
+})();
+
