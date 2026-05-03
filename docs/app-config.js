@@ -281,8 +281,9 @@ window.APP_CONFIG = {
 
       const existing = card.querySelector("[data-move-owner-id]");
       if (existing) {
+        const nextText = `${targetOwner}'e taşı`;
         existing.dataset.targetOwner = targetOwner;
-        existing.textContent = `${targetOwner}'e taşı`;
+        if (existing.textContent !== nextText) existing.textContent = nextText;
         return;
       }
 
@@ -491,17 +492,6 @@ window.APP_CONFIG = {
     injectFormExtras();
     injectOwnerTabs();
     injectNotificationTests();
-
-    const list = document.querySelector("#products");
-    if (list) {
-      new MutationObserver(() => {
-        injectMoveButtons();
-        injectCardExtras();
-      }).observe(list, {
-        childList: true,
-        subtree: true
-      });
-    }
 
     document.addEventListener(
       "click",
