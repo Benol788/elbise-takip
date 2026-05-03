@@ -411,6 +411,8 @@ def meta_content(html: str, name: str) -> str | None:
 
 def kitapyurdu_snapshot(html: str, final_url: str) -> ProductSnapshot:
     text = plain_html_text(html)
+    print(f"Kitapyurdu metin örneği: {text[:500]}")
+    print(f"Kitapyurdu fiyat adayları: {re.findall(r'[0-9]{1,3}(?:\\.[0-9]{3})*,[0-9]{2}', text)[:20]}")
     title = meta_content(html, "og:title") or "Kitapyurdu ürünü"
 
     price = None
