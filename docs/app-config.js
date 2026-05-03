@@ -21,11 +21,8 @@ window.APP_CONFIG = {
   };
 
   const originalFetch = window.fetch.bind(window);
-  let visibleRows = [];
-
-  function isProductsApi(url) {
-    return String(url || "").includes(".supabase.co") && String(url || "").includes("/products");
-  }
+  let allRows = [];
+  let applyTimer = null;
 
   function currentOwner() {
     const saved = localStorage.getItem("activeOwner");
@@ -34,6 +31,10 @@ window.APP_CONFIG = {
 
   function otherOwner() {
     return currentOwner() === "Kerim" ? "Selin" : "Kerim";
+  }
+
+  function rowOwner(row) {
+    return OWNERS.includes(row?.owner) ? row.owner : DEFAULT_OWNER;
   }
 
   function productsEndpoint(query = "") {
@@ -52,6 +53,79 @@ window.APP_CONFIG = {
     };
   }
 
+  function isProductsApi(url) {
+    const text = String(url || "");
+    return text.includes(".supabase.co") && text.includes("/products");
+  }
+
+  function fieldValue(selector, fallback = "") {
+    return document.querySelector(selector)?.value?.trim() || fallback;
+  }
+
+  function isProductSavePayload(payload) {
+    return (
+      Object.prototype.hasOwnProperty.call(payload, "product_id") ||
+      Object.prototype.hasOwnProperty.call(payload, "product_url") ||
+      Object.prototype.hasOwnProperty.call(payload, "target_price_min") ||
+      Object.prototype.hasOwnProperty.call(payload, "target_price_max")
+    );
+  }
+
+  function rowId(card) {
+    return (
+      card.querySelector("button[data-id]")?.dataset.id ||
+      card.querySelector("button[data-edit-id]")?.dataset.editId ||
+      card.querySelector("button[data-favorite-id]")?.dataset.favoriteId ||
+      card.querySelector("button[data-pause-id]")?.dataset.pauseId
+    );
+  }
+
+  function findRow(id) {
+    return allRows.find((row) => row.id === id);
+  }
+
+  function visibleRows() {
+    const owner = currentOwner();
+    return allRows.filter((row) => rowOwner(row) === owner);
+  }
+
+  function scheduleApply(delay = 80) {
+    clearTimeout(applyTimer);
+    applyTimer = setTimeout(applyProductsView, delay);
+  }
+
+  window.__ACTIVE_OWNER = currentOwner();
+
+  window.fetch = async (input, init = {}) => {
+    const url = typeof input === "string" ? input : input?.url || "";
+    const method = String(init?.method || input?.method || "GET").toUpperCase();
+    let nextInit = init;
+
+    if (isProductsApi(url) && (method === "POST" || method === "PATCH") && init?.body) {
+      try {
+        const payload = JSON.parse(init.body);
+
+        if (isProductSavePayload(payload)) {
+          payload.owner = fieldValue("#owner", currentOwner());
+          payload.note = fieldValue("#note");
+          payload.category = fieldValue("#category", "Diğer");
+          nextInit = { ...init, body: JSON.stringify(payload) };
+        }
+      } catch {}
+    }
+
+    const response = await originalFetch(input, nextInit);
+
+    if (isProductsApi(url) && method === "GET" && url.includes("select=") && response.ok) {
+      response.clone().json().then((rows) => {
+        allRows = Array.isArray(rows) ? rows : [];
+        scheduleApply(120);
+      }).catch(() => {});
+    }
+
+    return response;
+  };
+
   function setCurrentOwner(owner) {
     const next = OWNERS.includes(owner) ? owner : DEFAULT_OWNER;
     window.__ACTIVE_OWNER = next;
@@ -64,68 +138,8 @@ window.APP_CONFIG = {
     const ownerSelect = document.querySelector("#owner");
     if (ownerSelect) ownerSelect.value = next;
 
-    injectMoveButtons();
-    injectCardExtras();
+    scheduleApply(20);
   }
-
-  function rowId(card) {
-    return (
-      card.querySelector("button[data-id]")?.dataset.id ||
-      card.querySelector("button[data-edit-id]")?.dataset.editId ||
-      card.querySelector("button[data-favorite-id]")?.dataset.favoriteId
-    );
-  }
-
-  function findRow(id) {
-    return visibleRows.find((row) => row.id === id);
-  }
-
-  function fieldValue(selector, fallback = "") {
-    return document.querySelector(selector)?.value?.trim() || fallback;
-  }
-
-  window.__ACTIVE_OWNER = currentOwner();
-
-  window.fetch = async (input, init = {}) => {
-    const url = typeof input === "string" ? input : input?.url || "";
-    const method = String(init?.method || input?.method || "GET").toUpperCase();
-
-    if (isProductsApi(url) && (method === "POST" || method === "PATCH") && init?.body) {
-      try {
-        const payload = JSON.parse(init.body);
-        payload.owner = fieldValue("#owner", currentOwner());
-        payload.note = fieldValue("#note");
-        payload.category = fieldValue("#category", "Diğer");
-        init = { ...init, body: JSON.stringify(payload) };
-      } catch {}
-    }
-
-    const response = await originalFetch(input, init);
-
-    if (isProductsApi(url) && method === "GET" && url.includes("select=") && response.ok) {
-      try {
-        const rows = await response.clone().json();
-        const owner = currentOwner();
-
-        visibleRows = Array.isArray(rows)
-          ? rows.filter((row) => (row.owner || DEFAULT_OWNER) === owner)
-          : [];
-
-        setTimeout(() => {
-          injectMoveButtons();
-          injectCardExtras();
-        }, 80);
-
-        return new Response(JSON.stringify(visibleRows), {
-          status: response.status,
-          statusText: response.statusText,
-          headers: { "Content-Type": "application/json" }
-        });
-      } catch {}
-    }
-
-    return response;
-  };
 
   async function sendTestNotification(owner, button) {
     const topic = NTFY_TOPICS[owner];
@@ -178,8 +192,12 @@ window.APP_CONFIG = {
       throw new Error("Ürün taşınamadı.");
     }
 
+    const row = findRow(id);
+    if (row) row.owner = targetOwner;
+
     button.textContent = "Taşındı";
     document.querySelector("#refresh")?.click();
+    scheduleApply(200);
   }
 
   function injectFormExtras() {
@@ -227,13 +245,18 @@ window.APP_CONFIG = {
       `;
       form.insertBefore(label, actions);
     }
+
+    const ownerSelect = document.querySelector("#owner");
+    if (ownerSelect) ownerSelect.value = currentOwner();
   }
 
   function injectOwnerTabs() {
     const listSection = document.querySelector("#products")?.closest("section");
     const listTitle = listSection?.querySelector("h2");
 
-    if (listSection && listTitle && !document.querySelector(".owner-tabs")) {
+    if (!listSection || !listTitle) return;
+
+    if (!document.querySelector(".owner-tabs")) {
       const tabs = document.createElement("div");
       tabs.className = "owner-tabs";
       tabs.innerHTML = OWNERS.map((owner) => `
@@ -247,11 +270,12 @@ window.APP_CONFIG = {
         if (!button) return;
 
         setCurrentOwner(button.dataset.ownerTab);
-        document.querySelector("#refresh")?.click();
       });
     }
 
-    setCurrentOwner(currentOwner());
+    document.querySelectorAll("[data-owner-tab]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.ownerTab === currentOwner());
+    });
   }
 
   function injectNotificationTests() {
@@ -268,70 +292,110 @@ window.APP_CONFIG = {
     tabs.insertAdjacentElement("afterend", box);
   }
 
-  function injectMoveButtons() {
+  function injectMoveButton(card, row) {
+    const id = row?.id || rowId(card);
+    const actions =
+      card.querySelector(".product-actions") ||
+      card.querySelector("button[data-id]")?.parentElement;
+
+    if (!id || !actions) return;
+
     const targetOwner = otherOwner();
+    const nextText = `${targetOwner}'e taşı`;
+    const existing = card.querySelector("[data-move-owner-id]");
 
-    document.querySelectorAll("#products .product").forEach((card) => {
+    if (existing) {
+      existing.dataset.targetOwner = targetOwner;
+      if (existing.textContent !== nextText) existing.textContent = nextText;
+      return;
+    }
+
+    const button = document.createElement("button");
+    button.className = "secondary move-owner";
+    button.type = "button";
+    button.dataset.moveOwnerId = id;
+    button.dataset.targetOwner = targetOwner;
+    button.textContent = nextText;
+
+    const editButton = actions.querySelector("button[data-edit-id]");
+    if (editButton) {
+      actions.insertBefore(button, editButton);
+    } else {
+      actions.prepend(button);
+    }
+  }
+
+  function decorateCard(card, row) {
+    if (!row) return;
+
+    const signature = `${row.category || "Diğer"}|${row.note || ""}`;
+    if (card.dataset.extraSignature === signature) return;
+    card.dataset.extraSignature = signature;
+
+    card.querySelector(".category-badge")?.remove();
+    card.querySelector(".product-note")?.remove();
+
+    const title = card.querySelector(".title");
+    if (!title) return;
+
+    const category = row.category || "Diğer";
+    const badge = document.createElement("span");
+    badge.className = `category-badge category-${CATEGORIES[category] || "other"}`;
+    badge.textContent = category;
+    title.appendChild(badge);
+
+    if (row.note) {
+      const note = document.createElement("div");
+      note.className = "product-note";
+      note.textContent = `Not: ${row.note}`;
+      title.insertAdjacentElement("afterend", note);
+    }
+  }
+
+  function applyProductsView() {
+    injectStyles();
+    injectFormExtras();
+    injectOwnerTabs();
+    injectNotificationTests();
+
+    const list = document.querySelector("#products");
+    const status = document.querySelector("#status");
+    if (!list) return;
+
+    const owner = currentOwner();
+    const cards = Array.from(list.querySelectorAll(".product"));
+
+    list.querySelectorAll(".owner-empty").forEach((item) => item.remove());
+
+    if (!cards.length) {
+      if (status && allRows.length) status.textContent = `${visibleRows().length} ürün`;
+      return;
+    }
+
+    cards.forEach((card) => {
       const id = rowId(card);
-      const actions =
-        card.querySelector(".product-actions") ||
-        card.querySelector("button[data-id]")?.parentElement;
+      const row = findRow(id);
 
-      if (!id || !actions) return;
-
-      const existing = card.querySelector("[data-move-owner-id]");
-      if (existing) {
-        const nextText = `${targetOwner}'e taşı`;
-        existing.dataset.targetOwner = targetOwner;
-        if (existing.textContent !== nextText) existing.textContent = nextText;
+      if (allRows.length && (!row || rowOwner(row) !== owner)) {
+        card.hidden = true;
         return;
       }
 
-      const button = document.createElement("button");
-      button.className = "secondary move-owner";
-      button.type = "button";
-      button.dataset.moveOwnerId = id;
-      button.dataset.targetOwner = targetOwner;
-      button.textContent = `${targetOwner}'e taşı`;
-
-      const editButton = actions.querySelector("button[data-edit-id]");
-      if (editButton) {
-        actions.insertBefore(button, editButton);
-      } else {
-        actions.prepend(button);
-      }
+      card.hidden = false;
+      injectMoveButton(card, row);
+      decorateCard(card, row);
     });
-  }
 
-  function injectCardExtras() {
-    document.querySelectorAll("#products .product").forEach((card) => {
-      const id = rowId(card);
-      const row = findRow(id);
-      if (!row) return;
+    const visibleCount = visibleRows().length;
+    if (status) status.textContent = `${visibleCount} ürün`;
 
-      if (card.dataset.extrasReady === `${row.category || "Diğer"}-${row.note || ""}`) return;
-      card.dataset.extrasReady = `${row.category || "Diğer"}-${row.note || ""}`;
-
-      card.querySelector(".category-badge")?.remove();
-      card.querySelector(".product-note")?.remove();
-
-      const title = card.querySelector(".title");
-      const body = card.querySelector(".product-body") || card.firstElementChild;
-      if (!title || !body) return;
-
-      const category = row.category || "Diğer";
-      const badge = document.createElement("span");
-      badge.className = `category-badge category-${CATEGORIES[category] || "other"}`;
-      badge.textContent = category;
-      title.appendChild(badge);
-
-      if (row.note) {
-        const note = document.createElement("div");
-        note.className = "product-note";
-        note.textContent = `Not: ${row.note}`;
-        title.insertAdjacentElement("afterend", note);
-      }
-    });
+    const visibleCards = cards.filter((card) => !card.hidden);
+    if (!visibleCards.length && allRows.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty owner-empty";
+      empty.textContent = "Bu listede ürün yok.";
+      list.appendChild(empty);
+    }
   }
 
   function fillExtraFields(id) {
@@ -342,7 +406,7 @@ window.APP_CONFIG = {
     const category = document.querySelector("#category");
     const note = document.querySelector("#note");
 
-    if (owner) owner.value = row.owner || currentOwner();
+    if (owner) owner.value = rowOwner(row);
     if (category) category.value = row.category || "Diğer";
     if (note) note.value = row.note || "";
   }
@@ -401,11 +465,6 @@ window.APP_CONFIG = {
 
       .notify-test.selin {
         background: linear-gradient(135deg, #ff6da8, #9b7cff);
-      }
-
-      .notify-test:disabled {
-        opacity: 0.72;
-        cursor: wait;
       }
 
       .move-owner {
@@ -524,7 +583,13 @@ window.APP_CONFIG = {
       true
     );
 
-    injectMoveButtons();
-    injectCardExtras();
+    let ticks = 0;
+    const boot = setInterval(() => {
+      applyProductsView();
+      ticks += 1;
+      if (ticks > 12) clearInterval(boot);
+    }, 400);
+
+    scheduleApply(250);
   });
 })();
