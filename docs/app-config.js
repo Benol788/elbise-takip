@@ -117,11 +117,24 @@ window.APP_CONFIG = {
     const response = await originalFetch(input, nextInit);
 
     if (isProductsApi(url) && method === "GET" && url.includes("select=") && response.ok) {
-      response.clone().json().then((rows) => {
-        allRows = Array.isArray(rows) ? rows : [];
-        scheduleApply(120);
-      }).catch(() => {});
-    }
+     try {
+       const rows = await response.clone().json();
+       allRows = Array.isArray(rows) ? rows : [];
+
+       const owner = currentOwner();
+       const filteredRows = allRows.filter((row) => rowOwner(row) === owner);
+
+       setTimeout(() => {
+         scheduleApply(80);
+       }, 80);
+
+       return new Response(JSON.stringify(filteredRows), {
+         status: response.status,
+         statusText: response.statusText,
+         headers: { "Content-Type": "application/json" }
+       });
+     } catch {}
+  }
 
     return response;
   };
@@ -138,7 +151,8 @@ window.APP_CONFIG = {
     const ownerSelect = document.querySelector("#owner");
     if (ownerSelect) ownerSelect.value = next;
 
-    scheduleApply(20);
+    document.querySelector("#refresh")?.click();
+    scheduleApply(80);
   }
 
   async function sendTestNotification(owner, button) {
