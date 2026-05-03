@@ -415,9 +415,9 @@ def kitapyurdu_snapshot(html: str, final_url: str) -> ProductSnapshot:
 
     price = None
     price_patterns = [
-       r"Kitapyurdu\s+Fiyat[ıi]\s*:?\s*([0-9][0-9.,]*)",
-       r"Kitapyurdu\s+Fiyat[ıi].{0,40}?([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2})",
-       r"([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2})\s*TL",
+        r"Kitapyurdu\s*Fiyat.{0,160}?([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2})",
+        r"Kitapyurdu.{0,220}?([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2})",
+        r"([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2})\s*TL",
     ]
 
     for pattern in price_patterns:
@@ -427,9 +427,24 @@ def kitapyurdu_snapshot(html: str, final_url: str) -> ProductSnapshot:
             if price is not None:
                 break
 
+    if price is None:
+        all_prices = [
+            parse_price_string(match)
+            for match in re.findall(r"[0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2}", text)
+        ]
+        all_prices = [value for value in all_prices if value is not None]
+        if all_prices:
+            price = min(all_prices)
+
+    normalized = normalize_text(text)
     false_words = ("stokta yok", "tükendi", "temin edilemiyor", "satışta değildir")
-    overall_stock = not any(word in normalize_text(text) for word in false_words)
-    if "sepete ekle" not in normalize_text(text) and "kargoya verilir" not in normalize_text(text):
+    true_words = ("sepete ekle", "kargoya verilir", "saatte kargoda", "stokta")
+
+    if any(word in normalized for word in false_words):
+        overall_stock = False
+    elif any(word in normalized for word in true_words):
+        overall_stock = True
+    else:
         overall_stock = None
 
     return ProductSnapshot(
