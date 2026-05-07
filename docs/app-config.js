@@ -156,39 +156,44 @@ window.APP_CONFIG = {
   }
 
   async function sendTestNotification(owner, button) {
-    const topic = NTFY_TOPICS[owner];
-    if (!topic) {
-      alert("Bildirim kanalı bulunamadı.");
-      return;
-    }
+  const topic = NTFY_TOPICS[owner];
 
-    const oldText = button.textContent;
-    button.disabled = true;
-    button.textContent = "Gönderiliyor";
+  if (!topic) {
+    alert("Bildirim kanalı bulunamadı.");
+    return;
+  }
 
-    const params = new URLSearchParams({
-      title: `${owner} test bildirimi`,
-      message: `${owner} için test bildirimi gönderildi.\nPanel bildirimi çalışıyor.`,
-      tags: "bell,shopping"
+  const oldText = button.textContent;
+  button.disabled = true;
+  button.textContent = "Gönderiliyor";
+
+  try {
+    const isSelin = owner === "Selin";
+
+    const title = isSelin ? "Selin" : "Kerim";
+    const message = isSelin
+      ? "SENİ ÇOK SEVİYORUM SELİN"
+      : "Kerim test bildirimi";
+
+    const response = await fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
+      method: "POST",
+      headers: {
+        "Title": title,
+        "Priority": "3",
+        "Content-Type": "text/plain; charset=utf-8"
+      },
+      body: message
     });
 
-    try {
-      await originalFetch(`https://ntfy.sh/${encodeURIComponent(topic)}/publish?${params.toString()}`, {
-        mode: "no-cors",
-        cache: "no-store"
-      });
-
-      button.textContent = "Gönderildi";
-      setTimeout(() => {
-        button.disabled = false;
-        button.textContent = oldText;
-      }, 1600);
-    } catch {
-      button.disabled = false;
-      button.textContent = oldText;
-      alert("Test bildirimi gönderilemedi.");
-    }
+    if (!response.ok) throw new Error("Bildirim gönderilemedi.");
+    alert("Bildirim gönderildi.");
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = oldText;
   }
+}
 
   async function moveProduct(id, targetOwner, button) {
     button.disabled = true;
